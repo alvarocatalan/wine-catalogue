@@ -1,0 +1,18 @@
+{
+  "name": "wine-catalog",
+  "type": "module",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "SKIP_KEYSTATIC=true astro build",
+    "build:cms": "astro build",
+    "preview": "astro preview",
+    "gen:fixture": "node scripts/gen-fixture.mjs"
+  },
+  "dependencies": {
+    "@astrojs/markdoc": "^0.15.11",
+    "astro": "^5.18.2",
+    "zod": "^3.25.76"
+  }
+}

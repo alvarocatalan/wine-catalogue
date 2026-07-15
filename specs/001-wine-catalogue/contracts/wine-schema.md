@@ -1,107 +1,127 @@
-# Contract: Wine Record Schema & IndexedDB Repository
+# Contract: Wine Schema (Zod + Content Collection + Keystatic parity)
 
-**Feature**: 001-wine-catalogue | **Type**: Zod record schema + IndexedDB repository API
+**Feature**: 001-wine-catalogue | **Type**: build-time content schema + CMS schema
 
-> **Re-architected 2026-07-15**: this is now a **runtime** data contract. Zod
-> validates form input before a write (the runtime "block the save"); the
-> repository is the sole gateway to IndexedDB. Replaces the former
-> Astro-Content-Collection build-time schema.
+> **Re-architected 2026-07-15** for Constitution v1.1.0: the wine is
+> **git-versioned content** validated **at build** by an Astro Content Layer
+> collection, and authored in **Keystatic**. One Zod schema is the single source
+> of truth; Keystatic mirrors it (enforced by a parity test). Replaces the former
+> IndexedDB runtime repository contract.
 
-## Record schema (reference implementation) — `src/lib/schema.ts`
+## Shared field set (canonical)
+
+`nombre`, `bodega`, `denominacionOrigen`, `anada`, `foto`, `fotoAlt`, `notas`.
+
+## Shared validation — `src/lib/schema.ts`
 
 ```ts
 import { z } from 'zod';
 
-const VINTAGE = /^(NV|\d{4})$/; // "NV" or a 4-digit year — FR-003
+export const VINTAGE = /^(NV|\d{4})$/; // "NV" or a 4-digit year — FR-003
 
-// Fields the user enters in the form.
-export const WineInput = z.object({
-  wineName: z.string().trim().min(1, 'Wine name is required'),              // FR-002
-  winery: z.string().trim().min(1, 'Winery is required'),                  // FR-002
-  designationOfOrigin: z.string().trim().min(1, 'Designation of origin is required'), // FR-002
-  vintage: z.string().regex(VINTAGE, 'Vintage must be "NV" or a 4-digit year'),       // FR-003
-  imageAlt: z.string().trim().min(1, 'Image description is required'),     // a11y
-});
-export type WineInput = z.infer<typeof WineInput>;
+// Frontmatter/data fields shared by the collection schema and the parity test.
+// `foto` is added by content.config.ts via the image() helper (see below);
+// `notas` is the Markdoc body, not a frontmatter field.
+export const wineFrontmatter = {
+  nombre: z.string().trim().min(1, 'El nombre es obligatorio'),                     // FR-002
+  bodega: z.string().trim().min(1, 'La bodega es obligatoria'),                     // FR-002
+  denominacionOrigen: z.string().trim().min(1, 'La D.O. es obligatoria'),           // FR-002
+  anada: z.string().regex(VINTAGE, 'La añada debe ser "NV" o un año de 4 cifras'),  // FR-003
+  fotoAlt: z.string().trim().min(1, 'La descripción de la imagen es obligatoria'),  // FR-021
+  createdAt: z.coerce.date(),
+} as const;
 
-// Full persisted record (adds identity + timestamps).
-export const WineRecord = WineInput.extend({
-  id: z.string().uuid(),
-  createdAt: z.number().int(),
-  updatedAt: z.number().int(),
-});
-export type WineRecord = z.infer<typeof WineRecord>;
-
-export interface WineImage {
-  thumb: Blob; full: Blob; mime: 'image/jpeg' | 'image/png' | 'image/webp';
-  width: number; height: number;
-}
+// Canonical key list — the parity test compares this to keystatic.config.ts.
+export const WINE_FIELDS = [
+  'nombre', 'bodega', 'denominacionOrigen', 'anada', 'foto', 'fotoAlt', 'notas',
+] as const;
 ```
 
-## Image validation contract (FR-014) — `src/lib/image.ts`
+## Content collection — `src/content.config.ts`
 
 ```ts
-export const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp'] as const;
-export const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
+import { wineFrontmatter } from './lib/schema';
 
-// Throws a user-facing error naming accepted formats + limit when invalid.
-export function validateImageFile(file: File): void;
-// Decode → canvas → two WebP Blobs (thumb ≤400px, full ≤1600px longest edge).
-export function processImage(file: File): Promise<WineImage>;
+const vinos = defineCollection({
+  loader: glob({ pattern: '**/*.mdoc', base: './src/content/vinos' }),
+  schema: ({ image }) =>
+    z.object({
+      ...wineFrontmatter,
+      foto: image(),          // resolves the co-located image → astro:assets <Image/> (FR-014)
+    }),
+});
+
+export const collections = { vinos };
 ```
 
-## Repository API (the only IndexedDB gateway) — `src/lib/db.ts`
+## Keystatic schema — `keystatic.config.ts` (local mode, mirrors the above)
 
 ```ts
-export interface WineWithImage extends WineRecord { image: WineImage | null; }
+import { config, fields, collection } from '@keystatic/core';
 
-export const db = {
-  // Load all text records (no Blobs) for in-memory search/filter, newest first.
-  listRecords(): Promise<WineRecord[]>;
-  // Load one record + its image Blobs (detail / edit).
-  get(id: string): Promise<WineWithImage | null>;
-  // Load a single image (grid lazy-loads thumbs).
-  getImage(id: string): Promise<WineImage | null>;
-  // Validate-then-create. Rejects if WineInput/​image invalid (FR-001/002).
-  create(input: WineInput, image: WineImage): Promise<WineRecord>;
-  // Update fields and/or replace the image (FR-010). Bumps updatedAt.
-  update(id: string, input: WineInput, image?: WineImage): Promise<WineRecord>;
-  // Hard delete of record + image (called only after the Undo window closes).
-  remove(id: string): Promise<void>;
-};
+export default config({
+  storage: { kind: 'local' },
+  collections: {
+    vinos: collection({
+      label: 'Vinos',
+      slugField: 'nombre',
+      path: 'src/content/vinos/*',
+      format: { contentField: 'notas' },       // notas = Markdoc body (FR-022)
+      schema: {
+        nombre: fields.slug({ name: { label: 'Nombre' } }),
+        bodega: fields.text({ label: 'Bodega', validation: { isRequired: true } }),
+        denominacionOrigen: fields.text({ label: 'Denominación de Origen', validation: { isRequired: true } }),
+        anada: fields.text({ label: 'Añada', validation: { isRequired: true } }), // "NV" o AAAA (FR-003)
+        foto: fields.image({
+          label: 'Foto',
+          directory: 'src/assets/vinos',        // co-located, versioned (FR-014)
+          publicPath: '../../assets/vinos/',    // path the image() helper can resolve (verify — research D4)
+          validation: { isRequired: true },
+        }),
+        fotoAlt: fields.text({ label: 'Texto alternativo de la foto', validation: { isRequired: true } }), // FR-021
+        notas: fields.mdoc({ label: 'Notas' }), // optional (FR-022)
+        createdAt: fields.date({ label: 'Creado', defaultValue: { kind: 'today' } }),
+      },
+    }),
+  },
+});
 ```
 
-## Example record (in `wines`) + image (in `images`)
+> **`anada`** is a free text field in Keystatic; the `NV`/`YYYY` rule is enforced
+> by Zod at build (and should be surfaced with a Keystatic field validation
+> pattern where supported). **`foto`** file size/format (≤10 MB, JPEG/PNG/WebP) is
+> validated on upload (FR-014). The `publicPath`/`directory` pairing is the seam to
+> verify against the `image()` helper (research Decision 4).
 
-```jsonc
-// wines
-{
-  "id": "b6f2…-uuid",
-  "wineName": "Único",
-  "winery": "Vega Sicilia",
-  "designationOfOrigin": "Ribera del Duero DO",
-  "vintage": "2018",              // or "NV"
-  "imageAlt": "Bottle of Vega Sicilia Único 2018 on a neutral background",
-  "createdAt": 1752566400000,
-  "updatedAt": 1752566400000
-}
-// images["b6f2…-uuid"] = { thumb: Blob, full: Blob, mime: "image/jpeg", width: 1200, height: 1600 }
+## Parity contract (test) — `tests/unit/schema-parity.test.ts`
+
+```ts
+// Asserts the Keystatic collection field set === WINE_FIELDS, so the CMS schema
+// and the content-collection schema cannot silently diverge.
+import keystaticConfig from '../../keystatic.config';
+import { WINE_FIELDS } from '../../src/lib/schema';
+
+const keystaticKeys = Object.keys(keystaticConfig.collections.vinos.schema).sort();
+expect(keystaticKeys).toEqual([...WINE_FIELDS].sort());
 ```
 
 ## Contract guarantees
 
 | Guarantee | Mechanism | Requirement |
 |---|---|---|
-| All four user fields present before save | `WineInput` `.min(1)` blocks submit | FR-001, FR-002 |
-| Vintage is `NV` or `YYYY` | `VINTAGE` regex | FR-003 |
-| Image is an accepted format ≤ 10 MB | `validateImageFile` | FR-014 |
-| Data survives reload / offline | IndexedDB persistence | FR-012 |
-| Accessible images | required `imageAlt` | Principle III |
-| Legitimate duplicates allowed | UUID identity; duplicate emits a **non-blocking** warning | Key Entities, duplicate edge case |
+| Four structured fields present before publish | Zod `.min(1)` at build; Keystatic `isRequired` at author time | FR-001, FR-002 |
+| Añada is `NV` or `YYYY` | `VINTAGE` regex (Zod) | FR-003 |
+| Image accepted (JPEG/PNG/WebP ≤ 10 MB), versioned, optimised | Keystatic `fields.image` + `image()` + `<Image/>` | FR-014 |
+| Alt text always present | required `fotoAlt` | FR-021 |
+| Content is versioned in git; no browser storage | files under `src/`; CI grep guard forbids IndexedDB/localStorage/sessionStorage | FR-012, Constitution VI |
+| CMS ⇆ collection schemas stay in sync | schema-parity test | plan / FR schema-mirror |
+| Legitimate duplicates allowed | slug identity; author-time non-blocking duplicate notice | Key Entities, duplicate edge case |
 
 ## Versioning
 
-The IndexedDB database carries a numeric `version`; adding a store/index or a
-required field is a breaking change requiring an `upgrade` migration and a PR
-migration note (Constitution governance). Adding an **optional** field is
-non-breaking.
+Adding a **required** field is a breaking content change (existing entries must be
+backfilled) needing a PR migration note (Constitution governance); adding an
+**optional** field is non-breaking. Schema changes MUST update Zod, the Keystatic
+schema, and `WINE_FIELDS` together (the parity test enforces this).

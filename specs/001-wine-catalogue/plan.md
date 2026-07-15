@@ -1,84 +1,107 @@
 # Implementation Plan: Wine Catalogue
 
-**Branch**: `001-wine-catalogue` | **Date**: 2026-07-15 (re-architected) | **Spec**: [spec.md](./spec.md)
+**Branch**: `001-wine-catalogue` | **Date**: 2026-07-15 (re-architected for Constitution v1.1.0) | **Spec**: [spec.md](./spec.md)
 
 **Input**: Feature specification from `/specs/001-wine-catalogue/spec.md`
 
-> **Re-architecture note (2026-07-15)**: The spec was refined to lock an
-> **interactive web app** with device-local storage (analysis findings I1/I2).
-> This plan **replaces** the earlier static-site + Git-authoring plan. See
-> [research.md](./research.md) for the superseding decisions.
+> **Re-architecture note (2026-07-15)**: This plan **replaces** the earlier
+> device-local / IndexedDB "interactive web app" plan. The spec was clarified
+> (Session 2026-07-15) and the constitution amended to **v1.1.0**, which makes
+> three principles NON-NEGOTIABLE: static generation & deployment, all content
+> (including images) as **version-controlled files in git**, and a **git-based
+> CMS** with **no runtime backend**. See [research.md](./research.md) for the
+> superseding decisions.
 
 ## Summary
 
-A minimalist, single-user personal wine catalogue that runs entirely in the
-browser. The user records each tasted wine's vintage, designation of origin,
-winery, and wine name with an uploaded image, then browses, searches, filters,
-edits, and deletes — all **inside the running app**, with everything stored
-**locally on their own device**.
+A minimalist, publicly-readable wine catalogue published as a **fully static
+site**. A single **administrator** authors each wine — vintage (añada),
+designation of origin, winery (bodega), wine name (nombre), an image with alt
+text, and optional notes — through the **Keystatic** git-based CMS panel at
+`/keystatic`, used **only in local development**. Keystatic (in **local mode**)
+writes each entry as a `.mdoc` file under `src/content/vinos/` and its image
+under `src/assets/vinos/`, both **committed to git**. `astro build` produces a
+static site: the catalogue grid, per-wine detail pages, and build-optimised
+images. Visitors browse, and **search/filter in memory** on the client (no
+storage). There is **no runtime backend** and **no browser storage**
+(IndexedDB / localStorage / sessionStorage) is used for content.
 
-**Technical approach**: An **Astro 5** static shell hosts one **Preact** island
-(`@astrojs/preact`) that renders the whole interactive catalogue (list / detail
-/ add / edit) client-side. Data and images persist in **IndexedDB** (via `idb`):
-a `wines` store for text records and an `images` store for resized WebP Blobs
-(`thumb` + `full`). Image upload is validated (JPEG/PNG/WebP, ≤ 10 MB) and
-resized/compressed in the browser via Canvas. **Search and filtering run
-in-memory** over the loaded records (case-insensitive, partial, all four fields,
-with which-field-matched). A **service worker** (`vite-plugin-pwa`) precaches
-the app shell for offline use; IndexedDB keeps the data offline too. Styling is
-**Tailwind CSS 4** design tokens shared by shell and island. There is **no
-backend and no database server**.
+**Technical approach**: **Astro 5** with default `output: 'static'`. Content is
+a **Content Layer** collection (`vinos`) loaded from `.mdoc` files, validated by
+a **Zod** schema whose `image()` helper resolves the co-located image so
+`astro:assets` `<Image />` optimises it at build. **Keystatic** (`@keystatic/core`
++ `@keystatic/astro`, `storage: { kind: 'local' }`) provides the authoring UI;
+its `keystatic.config.ts` schema mirrors the Zod schema field-for-field. Because
+Keystatic injects two on-demand routes (`/keystatic`, `/api/keystatic`,
+`prerender: false`), it needs `@astrojs/react` and a Node adapter — these are
+wired **conditionally, dev-only**, so the production build stays static with no
+server output. `@astrojs/markdoc` is always present to render `.mdoc` bodies
+(notas). Search/filter is a small client island over a build-time text index.
+Styling is **Tailwind CSS 4** tokens; a **service worker** (`@vite-pwa/astro`)
+precaches the published shell for offline viewing.
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.x (`strict`); Node 20 LTS for the build/test toolchain.
+**Language/Version**: TypeScript 5.x (`strict`); Node 20 LTS for build/test/dev toolchain.
 
-**Primary Dependencies**: Astro 5.x (`output: 'static'`), `@astrojs/preact` + Preact (+ `@preact/signals`), Tailwind CSS 4.x (`@tailwindcss/vite`), `idb` (IndexedDB), `zod` (form + record validation), `vite-plugin-pwa` (Workbox service worker + manifest).
+**Primary Dependencies**: Astro 5.x (`output: 'static'`), `@astrojs/markdoc` (always), Content Layer + `astro:assets`; `@keystatic/core` + `@keystatic/astro` (local mode) with `@astrojs/react` + `@astrojs/node` (**dev-only**, for the `/keystatic` panel); `@astrojs/preact` + `@preact/signals` (small public search/filter island); Tailwind CSS 4.x (`@tailwindcss/vite`); `zod` (single shared schema); `@vite-pwa/astro` (service worker + manifest).
 
-**Storage**: **IndexedDB** on the user's device — `wines` store (text records) + `images` store (WebP `thumb`/`full` Blobs). **No database server, no backend.**
+**Storage**: **Git repository** — `.mdoc` entries in `src/content/vinos/`, images in `src/assets/vinos/`, versioned as files. **No database, no runtime server, and NO IndexedDB / localStorage / sessionStorage** (Constitution VI). Client search state is ephemeral in-memory only.
 
-**Testing**: Vitest (unit + integration) with `@testing-library/preact` and `fake-indexeddb`; Playwright + axe (e2e + a11y); `astro check`; Lighthouse CI (performance budgets).
+**Testing**: Vitest (unit) for pure logic (vintage validator, search/filter/field-match, Zod schema, **schema-parity test** Keystatic↔Zod); `@testing-library/preact` for the search island; Playwright + `axe-core` (e2e + a11y over the built static site); `astro check` + content-collection schema validation (build-time content gate); Lighthouse CI (performance budgets).
 
-**Target Platform**: Static hosting / any CDN; modern desktop + mobile browsers; installable PWA; fully offline-capable (shell precached, data device-local).
+**Target Platform**: **GitHub Pages**, deployed via a **GitHub Actions** workflow (`.github/workflows/deploy.yml`) on push to `main` (no server runtime). Modern desktop + mobile browsers; installable PWA; published catalogue viewable offline once precached. The `/keystatic` authoring panel runs only under `astro dev` on the administrator's machine.
 
-**Project Type**: Client-rendered web application on a static Astro shell, single project.
+**Project Type**: Static site (content-driven) with a git-based CMS for authoring — single Astro project at the repo root.
 
-**Performance Goals**: Catalogue LCP ≤ 2.0 s on throttled "Slow 4G" / mid-tier mobile (SC-003); search/filter interaction → results ≤ 100 ms; app island JS ≤ 60 KB gzip (research Decision 10).
+**Performance Goals**: Catalogue first screen LCP ≤ 2.0 s on throttled "Slow 4G" / mid-tier mobile (SC-003); search/filter interaction → results ≤ 100 ms over ~1,000 entries (SC-002); public island JS ≤ 20 KB gzip; per-wine images served as build-optimised, responsive WebP via `<Image />`.
 
-**Constraints**: No backend/server runtime; offline browsing **and** authoring of the device-local catalogue (FR-012, FR-014); per-image limit 10 MB, formats JPEG/PNG/WebP; 1,000-entry scale without visible slowdown (FR-017) via windowed grid + lazy thumbnails; no credentials in `localStorage` (N/A — no auth).
+**Version ceiling (HARD CONSTRAINT, not a preference)**: Astro **MUST stay on 5.x**. `@keystatic/astro` only supports Astro **2–5**; **Astro 6 breaks the Keystatic admin panel** with React-hooks errors (Thinkmill/keystatic issue **#1515**, open). Do **NOT** upgrade to Astro 6/7 until Keystatic officially supports it — even though npm's default `astro` is newer. Pinned: `astro@^5` (verified: 5.18.2), `zod@^3` (matches `astro:content`), `@astrojs/markdoc@^0.15`.
 
-**Scale/Scope**: ~1,000 wine entries (FR-017); one shell route hosting a Preact island with client-side views: catalogue grid, detail, add form, edit form, delete+undo, search, filters.
+**Constraints**: Public site MUST be static, no runtime backend (Constitution V, VII; FR-018/019/020); content + images MUST be versioned files in git, no browser storage as system of record (Constitution VI; FR-012); authoring via Keystatic local mode only, admin authenticated by local environment + GitHub push credentials (FR-019); deployed to GitHub Pages via GitHub Actions on push to `main`, production build gated by `SKIP_KEYSTATIC=true` so `/keystatic` is excluded (FR-020, FR-023); per-image ≤ 10 MB, formats JPEG/PNG/WebP (FR-014); alt text required (FR-021); 1,000-entry scale without visible slowdown (FR-017); offline viewing of the published site via precache, authoring requires connectivity (Clarifications 2026-07-15).
+
+**Scale/Scope**: ~1,000 wine entries (FR-017). Public routes: catalogue grid (`/`), per-wine detail (`/vinos/[slug]`), plus offline/empty/no-results states. Authoring surface: the Keystatic panel (dev-only).
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-checked after Phase 1 design.*
 
-Gates derived from the four principles in `constitution.md` v1.0.0.
+Gates derived from the **seven** principles in `constitution.md` **v1.1.0**.
 
 ### I. Code Quality — PASS
 - TypeScript `strict`; ESLint + Prettier + `astro check` in CI; no merge bypassing checks.
-- Zod schema + typed IndexedDB repository document the data contract with intent; island components are single-responsibility (WineCard, WineForm, WineDetail, SearchBox, Filters, DeleteToast, Placeholder).
-- Reviews mandatory; Preact + signals avoids ad-hoc state sprawl. **No violation.**
+- **One shared Zod schema** (`src/lib/schema.ts`) is the single data contract, reused by the content collection and asserted (schema-parity test) against `keystatic.config.ts`. Pure logic (vintage, search) isolated in `src/lib/` and single-responsibility.
 
 ### II. Testing Standards (NON-NEGOTIABLE) — PASS
-- TDD for runtime logic (vintage validator, search/filter/compose, image validation, IndexedDB repository): tests first, red, then green.
-- Unit for logic/validators/repo (fake-indexeddb); integration for form-blocks-save, add→grid, edit-reflects, delete+undo, empty/no-results; e2e (Playwright) for the full add→browse→search→filter→clear→edit→delete→undo path **plus a reload-persists assertion** (FR-012).
-- "Data-integrity" 100% branch rule = Zod schema + vintage validator + IndexedDB repository, exhaustively tested; 80% line gate elsewhere. **No violation.**
+- TDD for runtime logic (vintage NV/YYYY validator, search/filter/compose/field-match, schema parity): tests first, red, then green.
+- Unit for logic + schema; component tests for the search island; e2e (Playwright) over the **built static site** for browse → search → filter → clear → detail, empty and no-results states; content-schema validation fails the build on bad frontmatter.
+- "Data-integrity" 100% branch rule = Zod schema + vintage validator + schema-parity check, exhaustively tested; 80% line gate elsewhere.
 
 ### III. User Experience Consistency — PASS
-- Single design system via centralised Tailwind tokens shared by shell + island; consistent card/detail/form components.
-- Documented empty, no-results, image-failure (placeholder), delete-confirm, and undo states (FR-013, FR-016, FR-011).
-- WCAG 2.1 AA verified pre-merge (axe in e2e; required `imageAlt`; keyboard-operable forms/dialogs; focus management on view changes; `aria-live` on grid + toasts). **No violation.**
+- Single design system via centralised Tailwind tokens; consistent card/detail components.
+- Documented empty, no-results, and image-failure (placeholder, FR-013) states.
+- WCAG 2.1 AA verified pre-merge (axe in e2e): **alt text is a required field** (`fotoAlt`, FR-021), keyboard-operable search/filter, focus order, `aria-live` on the filtered grid.
 
 ### IV. Performance Requirements — PASS
-- Declared budgets (research Decision 10) asserted by Lighthouse CI; >5% regression blocks merge.
-- Windowed grid + lazy thumbnails + in-memory search keep interactions <100 ms; measured under throttled/mid-tier conditions with ~1,000-entry IndexedDB fixtures. **No violation.**
-- *Note*: the JS budget is intentionally larger than the previous static plan (≤ 60 KB gz vs ≤ 15 KB) because this is a CRUD app; a declared budget with a regression gate satisfies Principle IV.
+- Static prerendered pages + build-optimised responsive images (`astro:assets`) + a ≤ 20 KB island → budgets asserted by Lighthouse CI; >5% regression blocks merge.
+- In-memory filter over a text-only index keeps interaction < 100 ms at 1,000 entries; measured under throttled/mid-tier conditions with a ~1,000-entry fixture.
+
+### V. Static Generation & Deployment (NON-NEGOTIABLE) — PASS
+- Production `astro build` uses `output: 'static'`; the public catalogue, detail pages, and images are pre-generated files servable by any static host/CDN.
+- Keystatic's on-demand routes and the Node adapter are added **only in dev** (see research Decision 2), so the deployed artifact has **no server runtime**. No content is rendered or served on demand in production (FR-020).
+
+### VI. Versioned Content in Git (NON-NEGOTIABLE) — PASS
+- Every wine is a `.mdoc` file (`src/content/vinos/`) and every image a file (`src/assets/vinos/`), committed to git — auditable, reviewable, revertible (FR-011 recovery via git history).
+- **No IndexedDB / localStorage / sessionStorage** anywhere as the system of record; the client search island keeps only transient filter state in memory (FR-012). A lint/grep guard in CI forbids those APIs.
+
+### VII. Git-Based Content Management, No Runtime Backend (NON-NEGOTIABLE) — PASS
+- Authoring is exclusively through the **Keystatic** git-based CMS in local mode; each create/edit/delete becomes a **commit** (FR-018). The administrator authenticates via their GitHub identity (FR-019).
+- There is **no always-on service** that owns or mutates content; the `/keystatic` panel is a local development tool, not a deployed backend.
 
 ### Additional Constraints
-- **Security/dependency hygiene**: dependency scanning in CI; new deps justified in PR; minimal dep surface. No secrets, no auth tokens (no auth); no `localStorage` credential storage (N/A). **PASS.**
-- **Documentation/ADRs**: spec + research + ADR for the interactive/device-local decision. **PASS.**
-- **Observability**: structured-logs-with-correlation-ID clause is **Not Applicable** (no server runtime); performance-metric intent met via Lighthouse CI (+ optional web-vitals RUM). **Justified deviation — see Complexity Tracking + research Decision 11.**
+- **Security/dependency hygiene**: dependency scanning in CI; new deps justified; public repo, admin-only authoring, public read-only (FR-019); no secrets committed. **PASS.**
+- **Documentation/ADRs**: spec + research + this re-architecture ADR. **PASS.**
+- **Observability**: the "service-level operation MUST emit structured logs with a correlation ID" clause is **Not Applicable** — there is no server runtime. See Complexity Tracking.
 
 **Gate result**: PASS (one documented, justified N/A). No unjustified violations. Proceed.
 
@@ -90,69 +113,72 @@ Gates derived from the four principles in `constitution.md` v1.0.0.
 specs/001-wine-catalogue/
 ├── plan.md              # This file (/speckit-plan output)
 ├── research.md          # Phase 0 — decisions (re-architected 2026-07-15)
-├── data-model.md        # Phase 1 — Wine Entry model (runtime + IndexedDB)
-├── quickstart.md        # Phase 1 — run + use + verify
-├── contracts/           # Phase 1 — data + UI contracts
-│   ├── wine-schema.md    #   Zod form/record contract + IndexedDB repository API
-│   └── ui-contracts.md   #   island views + search/filter/form/delete contracts
+├── data-model.md        # Phase 1 — Wine entry (.mdoc + frontmatter) model
+├── quickstart.md        # Phase 1 — install, author via /keystatic, build, verify
+├── contracts/           # Phase 1 — data + CMS + UI contracts
+│   ├── wine-schema.md    #   shared Zod schema + Keystatic config parity contract
+│   └── ui-contracts.md   #   public routes + search/filter/detail/state contracts
+├── checklists/
+│   └── requirements.md   # Spec quality checklist
 └── tasks.md             # Phase 2 (/speckit-tasks — regenerate; currently stale)
 ```
 
 ### Source Code (repository root)
 
-Single Astro project at the repo root; the interactive app is a Preact island:
+Single Astro project rooted at the repository:
 
 ```text
 src/
-├── components/
-│   ├── island/                     # Preact island (client-rendered app)
-│   │   ├── App.tsx                  # island root: view routing + state (signals)
-│   │   ├── WineGrid.tsx             # virtualised grid of cards
-│   │   ├── WineCard.tsx             # card (thumb, name, winery, vintage; future flag)
-│   │   ├── WineDetail.tsx           # detail view (full image + 4 fields)
-│   │   ├── WineForm.tsx             # add/edit form (Zod-validated, blocks save)
-│   │   ├── ImageUpload.tsx          # file input + validate + resize preview
-│   │   ├── SearchBox.tsx            # always-visible search input
-│   │   ├── Filters.tsx              # vintage / DO / winery facets + Clear
-│   │   ├── DeleteToast.tsx          # confirm + short-lived Undo (FR-011)
-│   │   ├── EmptyState.tsx           # empty + no-results states (FR-016)
-│   │   └── Placeholder.tsx          # image-failure fallback (FR-013)
+├── content.config.ts               # Astro 5 Content Layer: `vinos` glob(.mdoc) loader + Zod schema (image())
+├── content/
+│   └── vinos/                       # .mdoc entries (one per wine) — written by Keystatic, versioned in git
+├── assets/
+│   └── vinos/                       # co-located wine images — written by Keystatic, versioned in git
 ├── lib/
-│   ├── db.ts                        # IndexedDB repository (idb): CRUD over wines+images
-│   ├── schema.ts                    # Zod schema for a wine record (data contract)
-│   ├── vintage.ts                   # NV/YYYY validator + future-vintage flag
-│   ├── image.ts                     # validate (MIME/size) + Canvas resize → WebP Blobs
-│   └── search.ts                    # in-memory search + filter + compose + field-match
+│   ├── schema.ts                    # SINGLE shared Zod schema (nombre, bodega, denominacionOrigen, anada, foto, fotoAlt, notas)
+│   ├── vintage.ts                   # NV / YYYY validator + future-vintage flag
+│   └── search.ts                    # pure in-memory search + filter + compose + field-match
+├── components/
+│   ├── WineCard.astro               # card: optimised <Image/>, nombre, bodega, anada; data-* for filtering
+│   ├── WineGrid.astro               # grid of cards + mounts the search island
+│   ├── CatalogueSearch.tsx          # Preact island: search box + facets, filters cards in memory (signals)
+│   ├── EmptyState.astro             # empty + no-results states (FR-016)
+│   └── Placeholder.astro            # image-failure fallback (FR-013)
 ├── layouts/
 │   └── BaseLayout.astro             # shell: head, tokens, PWA registration
 ├── pages/
-│   └── index.astro                  # mounts <App client:only="preact" />
-├── styles/
-│   └── global.css                   # Tailwind entry + design tokens
-└── pwa.ts                           # service worker registration glue
+│   ├── index.astro                  # catalogue grid (static)
+│   └── vinos/
+│       └── [slug].astro             # per-wine detail page (getStaticPaths from `vinos`)
+└── styles/
+    └── global.css                   # Tailwind entry + design tokens
 
 public/
 ├── placeholder.svg                  # shared image-failure asset
 └── manifest.webmanifest             # PWA manifest
 
 tests/
-├── unit/                            # vintage, schema, search/compose, image, db(repo)
-├── integration/                     # form-blocks-save, add→grid, edit, delete+undo, empty
-└── e2e/                             # Playwright: full CRUD + search/filter + reload-persist + axe
+├── unit/                            # vintage, schema, search/compose, schema-parity (Keystatic↔Zod)
+├── component/                       # CatalogueSearch island (@testing-library/preact)
+└── e2e/                             # Playwright over built site: browse + search/filter + detail + empty + axe
 
-astro.config.mjs                     # static output, Preact, Tailwind, vite-plugin-pwa
-vitest.config.ts                     # jsdom + fake-indexeddb setup
-playwright.config.ts                 # runs against the built preview
+keystatic.config.ts                  # Keystatic schema (mirrors src/lib/schema.ts) — storage: local
+astro.config.mjs                     # output: 'static'; markdoc always; react()+keystatic()+node adapter gated by SKIP_KEYSTATIC (dev-only); site+base for GitHub Pages
+vitest.config.ts                     # jsdom for the island; node for lib
+playwright.config.ts                 # runs against the built static preview
 lighthouserc.json                    # performance budgets
+
+.github/
+└── workflows/
+    └── deploy.yml                   # GitHub Actions: build (SKIP_KEYSTATIC=true) + deploy to GitHub Pages on push to main (FR-020)
 ```
 
-**Structure Decision**: Single Astro project rooted at the repository. Astro
-provides the static shell, Tailwind, and PWA wiring; the entire interactive
-surface is one Preact island under `src/components/island/`, with framework-free
-logic (db, schema, search, image, vintage) in `src/lib/` so it is unit-testable
-in isolation. There is no backend, so no `backend/`+`frontend/` split. Because
-entries exist only in the user's IndexedDB, there are **no statically generated
-per-entry routes**; the island does client-side view routing.
+**Structure Decision**: Single Astro project at the repo root. Content and its
+images live **inside `src/`** as versioned files so `astro:assets` optimises
+them at build. The interactive surface shrinks to **one small Preact island**
+(search/filter) enhancing server-rendered cards; per-wine detail pages are
+**statically generated** via `getStaticPaths`. Keystatic is the authoring tool,
+wired dev-only. There is no backend, so no `backend/`+`frontend/` split.
 
 ## Complexity Tracking
 
@@ -160,4 +186,4 @@ Only one constitutional clause is not met in full; recorded here per the gate.
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|--------------------------------------|
-| Observability clause "service-level operation MUST emit structured logs with a correlation ID" marked **N/A** | The architecture has **no server runtime** — there are no service-level operations to log. Performance-metric intent is met via Lighthouse CI (+ optional web-vitals RUM). | Adding a backend/logging service solely to satisfy the clause would reintroduce a server, contradict the explicit no-backend/device-local directive, and add cost with no user value — worse than a documented N/A. |
+| Observability clause "service-level operation MUST emit structured logs with a correlation ID" marked **N/A** | The deployed architecture is a **static site with no server runtime** — there are no service-level operations to log. Build/CMS run locally. Performance-metric intent is met via Lighthouse CI. | Adding a backend/logging service solely to satisfy the clause would reintroduce a runtime server, directly violating Constitution V and VII, with no user value — worse than a documented N/A. |

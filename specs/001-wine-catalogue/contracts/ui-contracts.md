@@ -1,101 +1,87 @@
-# Contract: UI Surface & Interactive Island
+# Contract: UI Surface (public static site + Keystatic authoring)
 
-**Feature**: 001-wine-catalogue | **Type**: UI / island view contracts
+**Feature**: 001-wine-catalogue | **Type**: routes + search/filter + CMS contracts
 
-> **Re-architected 2026-07-15**: the app is a **Preact island** on a static
-> Astro shell, doing client-side view routing over device-local data. Replaces
-> the former static-pages + Pagefind contract.
+> **Re-architected 2026-07-15** for Constitution v1.1.0: the public product is a
+> **statically generated site** (catalogue grid + per-wine detail pages) with a
+> small client **search/filter island**; authoring is the dev-only **Keystatic**
+> panel. Replaces the former device-local Preact SPA contract.
 
-## Shell & mount
+## Public routes (static, prerendered)
 
 | Route | Renders | Requirements |
 |---|---|---|
-| `/` | Astro shell (`BaseLayout`) mounts `<App client:only="preact" />`; registers the service worker. | FR-015, offline |
+| `/` | `BaseLayout` + `WineGrid` (server-rendered cards) + mounted `CatalogueSearch` island; registers the service worker; empty state when no entries. | FR-004, FR-006, FR-008, FR-015, FR-016, FR-017 |
+| `/vinos/[slug]` | Per-wine detail: full optimised `<Image/>` (or placeholder), all four fields, rendered `notas`. Statically generated via `getStaticPaths()` over `vinos`. | FR-005, FR-013, FR-020, FR-022 |
 
-There are **no per-entry server routes** — entries live only in the user's
-IndexedDB. The island routes between views client-side (History API for
-in-session deep links).
+Visitors are **read-only** and unauthenticated (FR-019). There is **no server
+runtime** in production (Constitution V).
 
-## Island views
+## Authoring route (dev-only)
 
-| View | Shows | Requirements |
+| Route | Renders | Requirements |
 |---|---|---|
-| **Grid** (default) | Virtualised responsive grid of cards (lazy `thumb`, `wineName`, `winery`, `vintage`; visible future-vintage marker); always-visible search + filters; empty state when no entries. | FR-004, FR-006, FR-008, FR-015, FR-016, FR-017 |
-| **Detail** | `full` image (or placeholder) + all four fields; Edit + Delete actions. | FR-005, FR-013 |
-| **Add / Edit form** | Fields for the four attributes + `imageAlt` + image upload; inline validation. | FR-001, FR-002, FR-003, FR-010, FR-014 |
+| `/keystatic`, `/api/keystatic` | Keystatic admin UI (React) + local-mode file API. Present **only under `astro dev`** (conditional integration + Node adapter). Absent from the production static build. | FR-018, FR-019 |
 
-### Card contract
+## Card contract (`WineCard.astro`)
 
-Each card MUST display, in consistent layout/spacing: `thumb` (or placeholder),
-`wineName`, `winery`, `vintage`. Activating a card (click/Enter) opens Detail.
-Future-vintage entries carry a visible "suspicious" marker.
+Each card MUST display, in consistent layout/spacing: optimised `foto` thumbnail
+(or placeholder, FR-013), `nombre`, `bodega`, `anada`. Cards carry `data-*`
+attributes (`data-nombre`, `data-bodega`, `data-do`, `data-anada`) for in-memory
+filtering. Activating a card (click/Enter) navigates to `/vinos/[slug]`.
+Future-`anada` entries carry a visible "suspicious" marker (edge case).
 
-### Add / Edit form contract (FR-001, FR-002, FR-003, FR-010, FR-014)
-
-- **Blocks save** until all four fields + `imageAlt` are valid; invalid fields
-  show an inline message naming what is missing/wrong (FR-002).
-- `vintage` accepts `NV` or a 4-digit year (FR-003); future years are accepted
-  but flagged.
-- **Image upload**: `<input type="file" accept="image/jpeg,image/png,image/webp">`;
-  rejects unsupported types or files > 10 MB with a clear message stating the
-  accepted formats + limit; shows a resized preview before save (FR-014).
-- On **create** an image is required; on **edit** the existing image is retained
-  unless replaced (FR-010).
-- Saving a record whose `vintage`+`winery`+`wineName` duplicates an existing one
-  shows a **non-blocking** warning and still allows the save (duplicate edge case).
-
-### Delete + Undo contract (FR-011)
-
-- Delete opens an accessible **confirm dialog** (focus-trapped, Esc cancels).
-- On confirm, the card disappears and a **toast with "Undo"** shows for ~7 s.
-- IndexedDB purge commits only when the toast expires; **Undo** restores the
-  record + image.
-
-### Empty / no-results states (FR-016)
-
-- **Catalogue empty**: friendly empty state inviting the user to add their first
-  wine (button opens the Add form).
-- **Search/filter yields nothing**: explicit "no results" message replacing the
-  grid, not a blank area.
-
-## Search (in-memory) — `src/lib/search.ts`
+## Search island (`CatalogueSearch.tsx`, `@preact/signals`) + `src/lib/search.ts`
 
 - Input: free-text query from the always-visible search box.
-- Behaviour: case-insensitive, partial match across `wineName`, `winery`,
-  `designationOfOrigin`, `vintage` (FR-007); updates the grid **in place**,
+- Behaviour: case-insensitive, partial match across `nombre`, `bodega`,
+  `denominacionOrigen`, `anada` (FR-007); toggles card visibility **in place**,
   debounced, as the user types (FR-006).
-- Output: matching records **plus which field(s) matched**, surfaced on each
-  result (FR-007 / "Rioja matches DO and winery" edge case).
+- Output: for each visible result, **which field(s) matched** are surfaced
+  (FR-007 / "Rioja matches DO and bodega" edge case).
+- **No storage**: the island holds `{ query, activeFilters }` in signals only —
+  transient, never persisted (Constitution VI). It filters over the build-time
+  text index; it never fetches or writes content.
 
-## Filters — `src/components/island/Filters.tsx`
+## Filters
 
-- Facets derived in memory: distinct `vintage`, `designationOfOrigin`, `winery`.
+- Facets built at build/in memory: distinct `anada`, `denominacionOrigen`, `bodega`.
 - Selecting a facet narrows the grid and **clearly indicates the active filter**
   (FR-008).
 - Filters compose with search: **displayed = filterSet ∩ searchResults** (FR-008).
 - A single **"Clear"** resets all filters + the search term (FR-009).
 
-## Composition & state
+## Empty / no-results states (FR-016)
 
-The island holds `{ query, activeFilters, currentView }` in signals. On any
-change it recomputes the visible set (intersection of search + filters) and
-re-renders the grid (or the empty/no-results view). View state is transient;
-the catalogue data in IndexedDB persists across reloads (FR-012).
+- **Catalogue empty** (no entries at build): friendly empty state; since authoring
+  is via `/keystatic` in dev, it points the admin there.
+- **Search/filter yields nothing**: explicit "no results" message replacing the
+  grid, not a blank area.
+
+## Keystatic authoring contract (dev-only)
+
+- **Create/Edit**: interactive form with the seven fields; **image upload** via
+  file picker or drag-and-drop into `fields.image` (writes to `src/assets/vinos/`),
+  refusing non-JPEG/PNG/WebP or > 10 MB with a clear message (FR-014). Save writes
+  the `.mdoc` + image to the working tree for the admin to commit (FR-018).
+- **Delete**: confirmation step; the removal is a commit — recovery via git
+  history, no in-session undo (FR-011, Clarification Q3=B).
+- **Publish**: committing (and pushing) triggers the static rebuild/redeploy
+  (FR-020).
 
 ## Accessibility contract (Principle III)
 
-- Keyboard operable: search, filters, Clear, card links, form fields, upload,
-  confirm dialog, and toast Undo — all reachable with visible focus order.
-- Focus is moved and managed on view changes (grid⇄detail⇄form) and when the
-  confirm dialog opens/closes.
-- All images have non-empty `imageAlt`.
-- Result/empty/no-results changes and toasts announced via `aria-live` regions.
-- Colour contrast meets WCAG 2.1 AA against the minimalist palette.
+- Keyboard operable: search box, filters, Clear, card links, and detail-page
+  content — all reachable with visible focus order.
+- `aria-live` announces result/empty/no-results changes as the grid filters.
+- **Every image has a non-empty `alt`** from `fotoAlt` (FR-021).
+- Colour contrast meets WCAG 2.1 AA against the minimalist palette; verified by
+  axe in e2e before merge.
 
 ## Performance contract (Principle IV)
 
-- App island JS ≤ 60 KB gzip (research Decision 10).
-- Grid is windowed with lazy `thumb` Blobs so only visible cards mount (FR-017).
-- Search/filter interaction → painted results ≤ 100 ms over a 1,000-entry
-  in-memory dataset.
+- Public island JS ≤ 20 KB gzip (research Decision 11).
+- Cards use build-optimised responsive WebP (`astro:assets`), lazy-loaded below
+  the fold.
+- Search/filter interaction → repainted results ≤ 100 ms over a 1,000-entry index.
 - Catalogue LCP ≤ 2.0 s on throttled "Slow 4G" / mid-tier mobile (SC-003).

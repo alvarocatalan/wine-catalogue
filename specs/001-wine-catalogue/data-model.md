@@ -1,119 +1,131 @@
-# Phase 1 Data Model: Wine Catalogue
+# Phase 1 Data Model: Wine Catalogue (git-versioned content)
 
-**Feature**: 001-wine-catalogue | **Date**: 2026-07-15 (re-architected)
+**Feature**: 001-wine-catalogue | **Date**: 2026-07-15 (re-architected for Constitution v1.1.0)
 
-The data model is realised at **runtime in IndexedDB** on the user's device.
-There is no database server. A Zod schema (`src/lib/schema.ts`) is the
-authoritative record contract; the repository (`src/lib/db.ts`) is the only code
-that touches IndexedDB. See `contracts/wine-schema.md`.
+Each wine is a **`.mdoc` file** under `src/content/vinos/`, with its image under
+`src/assets/vinos/` — both **versioned in git**. There is no database and no
+browser storage. A single **Zod** schema (`src/lib/schema.ts`) is the
+authoritative contract; the Astro **Content Layer** collection validates every
+entry **at build**, and **Keystatic** authors entries against a mirror schema.
+See `contracts/wine-schema.md`.
 
 ---
 
-## Store: `wines` (text records)
+## Entity: Wine (`vinos` collection entry)
 
-One tasted wine per record. `keyPath: "id"`.
+One tasted wine per `.mdoc` file. The file **slug** is the stable identity (so
+legitimate duplicates coexist under distinct slugs). Structured fields are
+frontmatter; `notas` is the Markdoc body.
 
 ### Fields
 
-| Field | Type | Required | Rules | Source |
+| Field (canonical) | Type | Required | Rules | Source |
 |---|---|---|---|---|
-| `id` | string (UUID v4) | Yes | Generated on create; stable identity independent of field values, so legitimate duplicates are allowed. | FR-001, Key Entities |
-| `wineName` | string | Yes | Non-empty, trimmed. | FR-001, FR-002 |
-| `winery` | string | Yes | Non-empty, trimmed. | FR-001, FR-002 |
-| `designationOfOrigin` | string | Yes | Non-empty, trimmed. Free text — no enforced taxonomy. | FR-001, FR-002, Assumptions |
-| `vintage` | string | Yes | Literal `"NV"` **or** 4-digit year `^\d{4}$`. Stored as string to preserve `"NV"`. | FR-002, FR-003 |
-| `imageAlt` | string | Yes | Non-empty. Descriptive alt text (WCAG, Principle III). | Principle III |
-| `createdAt` | number (epoch ms) | Yes | Set on create. Default ordering = newest first. | Key Entities |
-| `updatedAt` | number (epoch ms) | Yes | Set on create and every edit. | FR-010 |
+| `nombre` | string | Yes | Non-empty, trimmed. Wine name. | FR-001, FR-002 |
+| `bodega` | string | Yes | Non-empty, trimmed. Winery. | FR-001, FR-002 |
+| `denominacionOrigen` | string | Yes | Non-empty, trimmed. Free text — no enforced taxonomy. Designation of origin. | FR-001, FR-002, Assumptions |
+| `anada` | string | Yes | Literal `"NV"` **or** 4-digit year `^\d{4}$`. String to preserve `"NV"`. Vintage. | FR-002, FR-003 |
+| `foto` | image (via `image()` helper) | Yes | Co-located file in `src/assets/vinos/`; built/optimised by `astro:assets`. Accepted on upload: JPEG/PNG/WebP ≤ 10 MB (FR-014). | FR-001, FR-014 |
+| `fotoAlt` | string | Yes | Non-empty. Alt text rendered as the image `alt` (WCAG, Principle III). | FR-021 |
+| `notas` | Markdoc body | No | Optional free-text notes; rendered on the detail view. | FR-022 |
+| `createdAt` | date | Yes | Set by Keystatic on create. Default ordering = newest first. | Key Entities |
 
-### Indexes
-
-| Index | Key | Used by |
-|---|---|---|
-| `by-createdAt` | `createdAt` | Default newest-first grid ordering. |
-
-> The actual image bytes are **not** in this store (see `images`), so the whole
-> catalogue's text can be loaded into memory cheaply for search/filter.
+> The slug (filename) is the identity; there is no separate `id` field. Ordering
+> uses `createdAt`.
 
 ---
 
-## Store: `images` (binary)
+## Storage layout (versioned in git)
 
-`key = wine id` (1:1 with a `wines` record).
+```text
+src/
+├── content/
+│   └── vinos/
+│       └── <slug>.mdoc          # frontmatter (nombre, bodega, denominacionOrigen,
+│                                #   anada, foto, fotoAlt, createdAt) + notas body
+└── assets/
+    └── vinos/
+        └── <slug>/foto.<ext>    # co-located image, referenced by `foto`
+```
 
-| Field | Type | Rules |
-|---|---|---|
-| `thumb` | Blob (WebP) | ≤ 400 px longest edge; rendered in the grid. |
-| `full` | Blob (WebP) | ≤ 1600 px longest edge; rendered in detail. |
-| `mime` | string | Original accepted MIME (`image/jpeg`\|`png`\|`webp`). |
-| `width` / `height` | number | Original decoded dimensions (for layout / CLS). |
+`.mdoc` frontmatter example:
 
-Rendered via `URL.createObjectURL(blob)`; object URLs are revoked on unmount.
-A missing/undecodable Blob falls back to the shared placeholder (FR-013).
+```yaml
+---
+nombre: Único
+bodega: Vega Sicilia
+denominacionOrigen: Ribera del Duero DO
+anada: "2018"                    # or "NV"
+foto: ./foto.jpg                 # resolved by the image() helper → astro:assets
+fotoAlt: Botella de Vega Sicilia Único 2018 sobre fondo neutro
+createdAt: 2026-07-15
+---
+Nariz de fruta madura y roble fino; taninos pulidos.   # notas (Markdoc body)
+```
 
 ---
 
-## Derived / computed (in memory, at runtime)
+## Derived / computed (at build or in the client island, never stored)
 
 | Derived value | How | Used by |
 |---|---|---|
-| `vintageIsFuture` | `vintage !== "NV" && Number(vintage) > currentYear` | Visibly flag future vintages as suspicious (edge case). |
-| Facets | Distinct sorted `vintage` / `designationOfOrigin` / `winery` over loaded records. | Filter controls (FR-008). |
-| Search result + matched fields | In-memory case-insensitive partial scan over the 4 fields; records which field(s) matched. | Search (FR-006, FR-007) + which-field-matched (FR-007 edge case, analysis U1). |
-| Duplicate warning | On save, detect an existing record with identical `vintage`+`winery`+`wineName`. | Non-blocking in-app warning (duplicate edge case) — save still allowed. |
+| `anadaIsFuture` | `anada !== "NV" && Number(anada) > currentYear` | Visibly flag future vintages as suspicious (edge case). |
+| Facets | Distinct sorted `anada` / `denominacionOrigen` / `bodega` over all entries. | Filter controls (FR-008). |
+| Search index | Build-time JSON of `{ slug, nombre, bodega, denominacionOrigen, anada }` (text only). | Client in-memory search (FR-006/007). |
+| Matched field(s) | Computed during the in-memory scan. | Which-field-matched (FR-007 edge case). |
+| Duplicate warning | Author-time: an existing entry with identical `anada`+`bodega`+`nombre`. | Non-blocking notice; entry still allowed (duplicate edge case). |
 
 ---
 
-## Validation rules (Zod, enforced on save — the runtime "block the save")
+## Validation rules (Zod — enforced at build; mirrored in Keystatic at author time)
 
-1. All required fields present and non-empty → else the form **blocks save** and
-   names the offending field(s) (FR-002).
-2. `vintage` matches `NV` or `^\d{4}$` (FR-003).
-3. Uploaded image: MIME ∈ {jpeg, png, webp} **and** size ≤ 10 MB → else upload
-   is refused with a message stating formats + limit (FR-014, edge case).
-4. `imageAlt` present (accessibility gate).
-5. On create, an image is required (FR-001); on edit, the existing image is kept
-   unless the user replaces it (FR-010).
+1. `nombre`, `bodega`, `denominacionOrigen` present and non-empty (FR-002).
+2. `anada` matches `NV` or `^\d{4}$` (FR-003).
+3. `foto` resolves to a co-located image (present on create); upload accepts only
+   JPEG/PNG/WebP ≤ 10 MB, else Keystatic refuses it with a message stating
+   formats + limit (FR-014).
+4. `fotoAlt` present and non-empty (accessibility gate, FR-021).
+5. `notas` optional (FR-022).
+
+A failing rule at build **fails `astro build`** (and `astro check`); an invalid
+entry cannot be published.
 
 ---
 
-## Lifecycle / state transitions
-
-Runtime state lives in IndexedDB + the island's in-memory store:
+## Lifecycle / state transitions (git-backed)
 
 ```
-        create (form, Zod-valid) ─────▶ record in `wines` + Blobs in `images`
-              │                                   │
-        edit (form) ──▶ updated record       delete (confirm)
-              │                                   │
-              │                          removed from grid, held in memory
-              │                                   │  ┌── Undo (within ~7s) ──┐
-              │                                   ▼  ▼                        │
-              │                          purge from IndexedDB   ◀── restore ──┘
-              └───────────────────────────────────────────────────────────────
+   Keystatic create (schema-valid) ──▶ new <slug>.mdoc + image committed to git
+             │                                        │
+        Keystatic edit ──▶ file change committed   Keystatic delete (confirm)
+             │                                        │
+             │                                   file removed in a commit
+             │                                        │
+             └───────── recovery ── git revert / history ◀── (no in-session undo)
 ```
 
-- **Confirm + Undo**: delete asks for confirmation, then a ~7 s toast offers
-  Undo; the IndexedDB purge only commits when the toast expires (FR-011,
-  research Decision 8).
-- **Transient UI state**: `{ query, activeFilters, currentView }` held in island
-  signals; reset by the single **Clear** control (FR-009); not persisted across
-  reloads (the catalogue itself is).
+- **Publish**: a commit (produced via the CMS) triggers a rebuild/redeploy of the
+  static site (FR-020).
+- **Delete + recovery**: confirmation step in Keystatic; the deletion is a
+  revertible commit — recovery is via git history, not an ephemeral undo
+  (Clarification 2026-07-15, Q3=B; FR-011).
+- **Client UI state**: the public island holds `{ query, activeFilters }` in
+  signals only — transient, never persisted, no browser storage (Constitution VI).
 
 ---
 
 ## Relationships
 
-- A Wine Entry has exactly **one** image (`wines.id` ↔ `images.<id>`, 1:1).
-- Wineries / designations / vintages are **not** separate entities — free-text
-  attributes aggregated only into in-memory facets for filtering (Assumptions
-  forbid an enforced taxonomy in v1).
+- A Wine has exactly **one** image (`foto`), co-located with its `.mdoc` (1:1).
+- Bodegas / denominaciones / añadas are **not** separate entities — free-text
+  attributes aggregated only into build/in-memory facets (no enforced taxonomy in
+  v1, Assumptions).
 
 ---
 
 ## Scale
 
-~1,000 entries (FR-017, Assumptions). Text records load fully into memory for
-instant search/filter; the grid renders **windowed** with lazy `thumb` Blobs so
-only visible cards mount — keeping browse/search/filter within the performance
-budget (research Decision 10).
+~1,000 entries (FR-017, Assumptions). The full site (grid + one detail page per
+wine) is generated at build; the client search index is text-only (a few hundred
+KB at 1,000 entries), filtered in memory well within the 100 ms interaction budget
+(research Decision 7 & 11).

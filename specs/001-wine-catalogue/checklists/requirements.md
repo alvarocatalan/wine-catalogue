@@ -36,18 +36,19 @@
   uploaded by the user from their device after they have sourced it
   themselves. Spec, edge cases, assumptions, and dependencies updated
   accordingly.
-- **Refined 2026-07-15** to lock the **interactive web app** product
-  direction (analysis findings I1/I2). The spec now states explicitly that
-  create/edit/delete happen inside the running app and that entries + images
-  are stored locally on the user's device. Resolved from the prior
-  cross-artifact analysis:
-  - **C1** — FR-014 now sets a concrete 10 MB per-image size limit and a
+- **Clarified 2026-07-15 (Session)** to align with **Constitution v1.1.0**:
+  the product is a **statically generated, statically published site** whose
+  content and images are **version-controlled files in git**, authored by a
+  single administrator through a **git-based CMS** (GitHub authentication),
+  with no runtime server backend and no browser-only storage as the system of
+  record. This **supersedes** the earlier device-local / in-browser direction
+  described in the 2026-05-29 note and the now-void "interactive web app with
+  local storage" refinement. Still-valid analysis fixes retained:
+  - **C1** — FR-014 sets a concrete 10 MB per-image size limit and a
     format-rejection message (testable).
-  - **C2** — FR-012 now states device-local persistence, offline
-    availability, and "no account/server".
-  - **U1** — FR-007 now requires visibly indicating which field(s) matched.
-- **Downstream impact**: `plan.md` and `tasks.md` still describe the rejected
-  static-site + Git-authoring architecture and are now **out of sync** with
-  this spec. They MUST be regenerated via `/speckit-plan` (then
-  `/speckit-tasks`) before implementation.
+  - **U1** — FR-007 requires visibly indicating which field(s) matched.
+- **Downstream impact**: `plan.md` and `tasks.md` describe the now-superseded
+  device-local / in-browser architecture and are **out of sync** with this
+  spec and with the constitution. They MUST be regenerated via `/speckit-plan`
+  (then `/speckit-tasks`) before implementation.
 - All quality checks pass. Spec is ready for `/speckit-plan`.
