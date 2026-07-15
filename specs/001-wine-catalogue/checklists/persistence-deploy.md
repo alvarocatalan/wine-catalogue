@@ -15,7 +15,7 @@
 - [x] CHK002 - Is the prohibition on IndexedDB / localStorage / sessionStorage for content and images stated as a testable requirement? [Completeness, Spec §FR-012] ✓ — FR-012 ("MUST NOT use browser-only storage … as the system of record").
 - [x] CHK003 - Are requirements defined for the fallback image when a wine image is missing or fails to load? [Completeness, Spec §FR-013] ✓ — FR-013 + Edge Cases (placeholder).
 - [x] CHK004 - Is a requirement defined for what happens to a wine's image file when the wine entry is deleted (orphaned-asset handling)? [Gap] ✓ — Assumptions "Out of scope for v1": manual cleanup (conscious decision).
-- [x] CHK005 - Are requirements defined for how image files are named/located to avoid collisions between entries (e.g., duplicate wines)? [Gap] ✓ — Assumptions: images named after the wine slug.
+- [x] CHK005 - Are requirements defined for how image files are named/located to avoid collisions between entries (e.g., duplicate wines)? [Gap] ✓ — Assumptions + VERIFIED: Keystatic namespaces images in a per-slug subfolder (`src/assets/vinos/<slug>/`).
 - [x] CHK006 - Is it specified whether images must be included in the offline precache alongside published pages? [Coverage, Spec §Edge Cases] ✓ — Edge Cases + FR-012 ("published catalogue including images … offline via precache").
 
 ## Image Persistence — Clarity & Measurability

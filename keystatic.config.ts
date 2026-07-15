@@ -31,7 +31,7 @@ export default config({
           label: 'Texto alternativo de la foto',
           validation: { isRequired: true },
         }),
-        notas: fields.mdoc({ label: 'Notas' }),
+        notas: fields.markdoc({ label: 'Notas' }),
         createdAt: fields.date({ label: 'Creado', defaultValue: { kind: 'today' } }),
       },
     }),

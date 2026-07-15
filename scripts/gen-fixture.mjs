@@ -2,7 +2,9 @@
 // Simulates the file a Keystatic image upload would co-locate under src/assets/vinos/<slug>/.
 import { writeFileSync, mkdirSync } from 'node:fs';
 
-const dir = 'src/assets/vinos/vega-sicilia-unico-2018';
+// Path matches what Keystatic actually writes: <directory>/<slug>/<filename>,
+// where slug comes from slugField: 'nombre' ("Único" -> "unico").
+const dir = 'src/assets/vinos/unico';
 mkdirSync(dir, { recursive: true });
 const out = `${dir}/foto.png`;
 

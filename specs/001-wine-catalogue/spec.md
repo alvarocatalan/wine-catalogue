@@ -362,8 +362,9 @@ appears; confirm it can be recovered by reverting the commit.
   The site does not perform any web search on the administrator's behalf.
 - **Out of scope for v1 (conscious decisions, not gaps)**:
   - Automatic cleanup of orphaned images when a wine is deleted is out of
-    scope; the image file is removed manually. To avoid filename collisions,
-    each wine's image is named after the wine's slug.
+    scope; the image file is removed manually. To avoid collisions, Keystatic
+    stores each wine's image in a per-slug subfolder
+    (`src/assets/vinos/<slug>/`).
   - No numeric image-weight or image-specific LCP budget is defined; image
     optimisation relies on the default behaviour of Astro's `<Image />`
     component.

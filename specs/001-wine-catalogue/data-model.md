@@ -2,6 +2,11 @@
 
 **Feature**: 001-wine-catalogue | **Date**: 2026-07-15 (re-architected for Constitution v1.1.0)
 
+**Status**: **FROZEN for v1** — fields `nombre`, `bodega`, `denominacionOrigen`,
+`anada`, `foto`, `fotoAlt`, `notas`; identity = `nombre`-derived slug + Keystatic
+`-N` de-duplication. **No `id`/UUID field and no composite slug** (both evaluated
+and rejected — see research.md Decision 14).
+
 Each wine is a **`.mdoc` file** under `src/content/vinos/`, with its image under
 `src/assets/vinos/` — both **versioned in git**. There is no database and no
 browser storage. A single **Zod** schema (`src/lib/schema.ts`) is the
