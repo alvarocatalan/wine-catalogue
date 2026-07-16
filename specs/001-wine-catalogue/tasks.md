@@ -40,7 +40,7 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 - [x] T005 [P] Configure Playwright + `axe-core` in `playwright.config.ts` (runs against the built static preview). ✅ Playwright + axe done. **Lighthouse CI (`lighthouserc.json`) is NOT part of this task — moved to T045.**
 - [x] T006 Add `@astrojs/markdoc` integration to `astro.config.mjs` (always on — renders `.mdoc` bodies).
 - [x] T007 Wire the **dev-only** CMS stack in `astro.config.mjs`: conditionally include `@astrojs/react`, `@keystatic/astro`, and the `@astrojs/node` adapter **only when `SKIP_KEYSTATIC !== 'true'`** (Keystatic's official "disable admin UI in production" recipe), so a build with `SKIP_KEYSTATIC=true` mounts no `/keystatic` route and emits pure static output. Also set `site: 'https://alvarocatalan.github.io'` and `base: '/wine-catalog/'` (GitHub Pages project pages) (research Decision 2; FR-019, FR-020, FR-023, Constitution V).
-- [ ] T008 [P] Add `@vite-pwa/astro`: `public/manifest.webmanifest` + Workbox precache of the published shell/pages/images (view-only offline) (FR-012, research Decision 9).
+- [x] ~~T008 [P] Add `@vite-pwa/astro` (offline precache)~~ — **OUT OF SCOPE for v1 (descoped, won't do).** Offline viewing removed from scope (product decision 2026-07-16): the catalogue is consulted online — no service worker / PWA / precache. Persistence + the no-browser-storage rule are unaffected (FR-012; research Decision 9).
 - [ ] T009 [P] Add a CI guard script that greps the built `dist/` and `src/` for `indexedDB|localStorage|sessionStorage` and fails on any match (Constitution VI).
 
 ---
@@ -58,7 +58,7 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 - [x] T014 Create the `vinos` Content Layer collection in `src/content.config.ts` (glob `**/*.mdoc` over `src/content/vinos`, schema `({ image }) => …` using `wineFrontmatter` + `foto: image()`) (data-model.md).
 - [x] T015 Create `keystatic.config.ts` (local mode) mirroring the schema: seven fields, `slugField: 'nombre'`, `format: { contentField: 'notas' }`, `fields.image` with `directory: 'src/assets/vinos'` + `publicPath`, `isRequired` flags (contracts/wine-schema.md; FR-014, FR-018).
 - [x] T016 Create content dirs `src/content/vinos/` and `src/assets/vinos/` (with `.gitkeep`) versioned in git (FR-012).
-- [x] T017 Create `src/layouts/BaseLayout.astro` (head, tokens) and `public/placeholder.svg` (image-failure fallback) (FR-013, FR-015). **Note:** FR-013 is covered by `placeholder.svg` + inline `onerror` on `<Image>` — **no separate `Placeholder.astro` component**. Service-worker registration deferred to T008 (PWA).
+- [x] T017 Create `src/layouts/BaseLayout.astro` (head, tokens) and `public/placeholder.svg` (image-failure fallback) (FR-013, FR-015). **Note:** FR-013 is covered by `placeholder.svg` + inline `onerror` on `<Image>` — **no separate `Placeholder.astro` component**. No service-worker registration (offline viewing out of scope for v1 — T008 descoped).
 - [x] T018 **De-risk the image seam (research Decision 4)**: add one fixture wine (`.mdoc` + image), run `astro build`, and assert it produces an optimised `<img>` with a hashed `src` and the correct `alt`; fix `publicPath`/`directory` until the `image()` helper resolves.
 
 **Checkpoint**: Content pipeline proven end-to-end (author → validate → build → optimised image). User stories can begin.

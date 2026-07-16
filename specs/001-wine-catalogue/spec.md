@@ -12,9 +12,11 @@
 
 ### Session 2026-07-15
 
-- Q: Offline scope under the git-versioned / static-published model? → A: Public
-  site viewing works offline (PWA precache of published pages and images);
-  authoring (add/edit/delete) requires connectivity to commit to git.
+- Q: Offline scope under the git-versioned / static-published model? → A:
+  Offline viewing is **OUT OF SCOPE for v1** (product decision, 2026-07-16): the
+  catalogue is consulted **online** — no service worker / PWA / precache.
+  Authoring requires connectivity (git-based). Persistence and the
+  no-browser-storage rule are unaffected (FR-012, Constitution VI).
 - Q: How does the administrator authenticate for authoring? → A: Authoring is
   local-only (Keystatic local mode); the administrator is authenticated by their
   local environment and their GitHub push credentials — there is no CMS login.
@@ -197,10 +199,9 @@ appears; confirm it can be recovered by reverting the commit.
 - What happens when a search term matches multiple fields (e.g., "Rioja"
   matches both a designation of origin and a winery name)? The catalogue MUST
   return all matches and visibly indicate which field matched.
-- What happens if a visitor is offline? Browsing the already-published
-  catalogue (including images) MUST work offline via precache. Authoring
-  (add/edit/delete) is not available offline because it requires committing to
-  git; the administrator must be online to author.
+- What happens if a visitor is offline? **Not supported in v1** — the catalogue
+  is consulted online (no PWA/precache; a conscious v1 scope decision, see
+  Clarifications). Authoring also requires connectivity (git-based).
 
 ## Requirements *(mandatory)*
 
@@ -239,9 +240,9 @@ appears; confirm it can be recovered by reverting the commit.
   version-controlled files committed to the project's git repository, and MUST
   NOT use browser-only storage (IndexedDB, localStorage, or sessionStorage) as
   the system of record for content or images. Content MUST therefore be
-  identical for every visitor of the published site. The published catalogue
-  MUST be viewable offline via precache; authoring actions require connectivity
-  to commit to git. (Authoring/CMS: FR-018; deployment: FR-020.)
+  identical for every visitor of the published site. (The catalogue is consulted
+  **online**; offline viewing is **out of scope for v1** — see Clarifications.
+  Authoring/CMS: FR-018; deployment: FR-020.)
 - **FR-013**: System MUST display a neutral placeholder image whenever the
   configured wine image cannot be loaded.
 - **FR-014**: System MUST allow the administrator to attach a wine image by
@@ -366,9 +367,9 @@ appears; confirm it can be recovered by reverting the commit.
   size limit of 10 MB. These defaults can be revisited but MUST remain
   explicit so that the build-gate validation (FR-014) is testable.
 - All UI text is in English for v1. Additional locales are out of scope.
-- Offline behaviour: the published catalogue (pages and images) MUST be
-  viewable and searchable offline via precache. Authoring requires connectivity
-  because it commits to git.
+- The catalogue is consulted **online**; offline viewing is **out of scope for
+  v1** (no service worker / PWA / precache — conscious decision). Authoring
+  requires connectivity because it commits to git.
 - The administrator is expected to source the wine image themselves (typically
   by searching the winery's website or a public image search) before uploading.
   The site does not perform any web search on the administrator's behalf.
@@ -388,4 +389,5 @@ appears; confirm it can be recovered by reverting the commit.
 - Authoring depends on connectivity to the git host (GitHub) so that CMS
   actions can be committed and **pushed to the main branch** (the push triggers
   the GitHub Actions build + deploy to GitHub Pages); viewing the published
-  site has no such dependency once its assets are precached.
+  site needs only a normal network connection to the host (no offline/precache
+  in v1).

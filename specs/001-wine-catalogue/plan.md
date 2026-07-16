@@ -39,20 +39,20 @@ server output. `@astrojs/markdoc` is always present to render `.mdoc` bodies
 (notas). Search/filter is a small client island over a build-time text index.
 Styling is **plain CSS with custom-property tokens** (`global.css`) — Tailwind was
 evaluated and **discarded for v1** (small UI surface; plain CSS already meets
-FR-015 + WCAG AA; integration cost unjustified at this scale). A **service worker**
-(`@vite-pwa/astro`) precaches the published shell for offline viewing.
+FR-015 + WCAG AA; integration cost unjustified at this scale). The catalogue is consulted
+**online** — no service worker / PWA (offline viewing out of scope for v1).
 
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x (`strict`); Node 20 LTS for build/test/dev toolchain.
 
-**Primary Dependencies**: Astro 5.x (`output: 'static'`), `@astrojs/markdoc` (always), Content Layer + `astro:assets`; `@keystatic/core` + `@keystatic/astro` (local mode) with `@astrojs/react` + `@astrojs/node` (**dev-only**, for the `/keystatic` panel); `@astrojs/preact` + `@preact/signals` (small public search/filter island); **plain CSS with custom-property tokens** (`src/styles/global.css`) — Tailwind discarded for v1; `zod` (single shared schema); `@vite-pwa/astro` (service worker + manifest).
+**Primary Dependencies**: Astro 5.x (`output: 'static'`), `@astrojs/markdoc` (always), Content Layer + `astro:assets`; `@keystatic/core` + `@keystatic/astro` (local mode) with `@astrojs/react` + `@astrojs/node` (**dev-only**, for the `/keystatic` panel); `@astrojs/preact` + `@preact/signals` (small public search/filter island); **plain CSS with custom-property tokens** (`src/styles/global.css`) — Tailwind discarded for v1; `zod` (single shared schema). No PWA/service worker (offline out of scope for v1).
 
 **Storage**: **Git repository** — `.mdoc` entries in `src/content/vinos/`, images in `src/assets/vinos/`, versioned as files. **No database, no runtime server, and NO IndexedDB / localStorage / sessionStorage** (Constitution VI). Client search state is ephemeral in-memory only.
 
 **Testing**: Vitest (unit) for pure logic (vintage validator, search/filter/field-match, Zod schema, **schema-parity test** Keystatic↔Zod); `@testing-library/preact` for the search island; Playwright + `axe-core` (e2e + a11y over the built static site); `astro check` + content-collection schema validation (build-time content gate); Lighthouse CI (performance budgets).
 
-**Target Platform**: **GitHub Pages**, deployed via a **GitHub Actions** workflow (`.github/workflows/deploy.yml`) on push to `main` (no server runtime). Modern desktop + mobile browsers; installable PWA; published catalogue viewable offline once precached. The `/keystatic` authoring panel runs only under `astro dev` on the administrator's machine.
+**Target Platform**: **GitHub Pages**, deployed via a **GitHub Actions** workflow (`.github/workflows/deploy.yml`) on push to `main` (no server runtime). Modern desktop + mobile browsers; online consultation only — **no PWA / offline in v1**. The `/keystatic` authoring panel runs only under `astro dev` on the administrator's machine.
 
 **Project Type**: Static site (content-driven) with a git-based CMS for authoring — single Astro project at the repo root.
 
@@ -60,9 +60,9 @@ FR-015 + WCAG AA; integration cost unjustified at this scale). A **service worke
 
 **Version ceiling (HARD CONSTRAINT, not a preference)**: Astro **MUST stay on 5.x**. `@keystatic/astro` only supports Astro **2–5**; **Astro 6 breaks the Keystatic admin panel** with React-hooks errors (Thinkmill/keystatic issue **#1515**, open). Do **NOT** upgrade to Astro 6/7 until Keystatic officially supports it — even though npm's default `astro` is newer. Pinned: `astro@^5` (verified: 5.18.2), `zod@^3` (matches `astro:content`), `@astrojs/markdoc@^0.15`.
 
-**Constraints**: Public site MUST be static, no runtime backend (Constitution V, VII; FR-018/019/020); content + images MUST be versioned files in git, no browser storage as system of record (Constitution VI; FR-012); authoring via Keystatic local mode only, admin authenticated by local environment + GitHub push credentials (FR-019); deployed to GitHub Pages via GitHub Actions on push to `main`, production build gated by `SKIP_KEYSTATIC=true` so `/keystatic` is excluded (FR-020, FR-023); per-image ≤ 10 MB, formats JPEG/PNG/WebP enforced by a **build gate** (Keystatic's `fields.image` cannot validate format/size — only presence) (FR-014); alt text required (FR-021); 1,000-entry scale without visible slowdown (FR-017); offline viewing of the published site via precache, authoring requires connectivity (Clarifications 2026-07-15).
+**Constraints**: Public site MUST be static, no runtime backend (Constitution V, VII; FR-018/019/020); content + images MUST be versioned files in git, no browser storage as system of record (Constitution VI; FR-012); authoring via Keystatic local mode only, admin authenticated by local environment + GitHub push credentials (FR-019); deployed to GitHub Pages via GitHub Actions on push to `main`, production build gated by `SKIP_KEYSTATIC=true` so `/keystatic` is excluded (FR-020, FR-023); per-image ≤ 10 MB, formats JPEG/PNG/WebP enforced by a **build gate** (Keystatic's `fields.image` cannot validate format/size — only presence) (FR-014); alt text required (FR-021); 1,000-entry scale without visible slowdown (FR-017); authoring requires connectivity; **offline viewing out of scope for v1** — no PWA/precache (Clarifications).
 
-**Scale/Scope**: ~1,000 wine entries (FR-017). Public routes: catalogue grid (`/`), per-wine detail (`/vinos/[slug]`), plus offline/empty/no-results states. Authoring surface: the Keystatic panel (dev-only).
+**Scale/Scope**: ~1,000 wine entries (FR-017). Public routes: catalogue grid (`/`), per-wine detail (`/vinos/[slug]`), plus empty/no-results states. Authoring surface: the Keystatic panel (dev-only).
 
 ## Constitution Check
 
@@ -147,7 +147,7 @@ src/
 │   ├── EmptyState.astro             # empty + no-results states (FR-016)
 │   └── Placeholder.astro            # image-failure fallback (FR-013)
 ├── layouts/
-│   └── BaseLayout.astro             # shell: head, tokens, PWA registration
+│   └── BaseLayout.astro             # shell: head, tokens
 ├── pages/
 │   ├── index.astro                  # catalogue grid (static)
 │   └── vinos/
@@ -156,8 +156,7 @@ src/
     └── global.css                   # design tokens (CSS custom properties) — plain CSS, no Tailwind
 
 public/
-├── placeholder.svg                  # shared image-failure asset
-└── manifest.webmanifest             # PWA manifest
+└── placeholder.svg                  # shared image-failure asset
 
 tests/
 ├── unit/                            # vintage, schema, search/compose, schema-parity (Keystatic↔Zod)

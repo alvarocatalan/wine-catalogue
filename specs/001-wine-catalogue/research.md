@@ -133,15 +133,17 @@ Each decision: **Decision** · **Rationale** · **Alternatives considered**.
 - **Alternatives considered**: client-side detail routing (old model — needs data
   in the browser, no shareable URL); modal-only detail (no deep link).
 
-## Decision 9 — Offline: precache the published shell (view-only)
+## Decision 9 — Offline viewing: DESCOPED for v1
 
-- **Decision**: `@vite-pwa/astro` (Workbox) precaches the shell and published
-  pages/images → catalogue **viewable offline**. **Authoring is not offline**
-  (it commits to git) — Clarification 2026-07-15 (Q1=A).
-- **Rationale**: Matches the clarified offline scope and FR-012 with no client
-  storage of content (precache is HTTP cache, not app storage of record).
-- **Alternatives considered**: full offline authoring + later sync (needs a client
-  store — violates VI); no PWA (loses offline viewing).
+- **Decision (2026-07-16, product)**: Offline viewing is **out of scope for v1**.
+  The catalogue is consulted **online**; there is **no service worker / PWA /
+  precache** (`@vite-pwa/astro` is not used). Supersedes the earlier "precache the
+  published shell" plan.
+- **Rationale**: A small static catalogue on GitHub Pages; a service-worker/
+  precache layer adds little v1 value. **Persistence and the no-browser-storage
+  rule (Constitution VI) are unaffected** — content stays versioned in git.
+- **Alternatives considered**: PWA precache of the published shell (previously
+  planned; descoped); full offline authoring (violates VI — needs a client store).
 
 ## Decision 10 — Deletion & edit recovery via git history
 
@@ -219,7 +221,7 @@ Each decision: **Decision** · **Rationale** · **Alternatives considered**.
 All Technical Context items are resolved; **no NEEDS CLARIFICATION remain**. Lines
 pinned: Astro 5.x (`output: 'static'`), `@astrojs/markdoc`, `@keystatic/core` +
 `@keystatic/astro` (local, dev-only routes) with `@astrojs/react` + `@astrojs/node`
-dev-only, `@astrojs/preact` + `@preact/signals`, plain CSS (`global.css`; Tailwind discarded for v1), `zod`,
-`@vite-pwa/astro`. Exact versions locked in `package.json` at implementation time.
+dev-only, `@astrojs/preact` + `@preact/signals`, plain CSS (`global.css`; Tailwind discarded for v1), `zod`.
+No PWA/service worker (offline descoped for v1). Exact versions locked in `package.json` at implementation time.
 The one integration seam to validate first is Keystatic image field ↔
 `astro:assets` `image()` (Decision 4).

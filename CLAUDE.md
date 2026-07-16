@@ -19,8 +19,8 @@ Images are processed at build via the Content Collections `image()` helper +
 the `vinos` collection and is mirrored by `keystatic.config.ts` (enforced by a
 schema-parity test). Fields: `nombre`, `bodega`, `denominacionOrigen`, `anada`
 (`NV`/`YYYY`), `foto`, `fotoAlt`, `notas`. Search/filter run **in-memory** in a
-small **Preact** island over a build-time text index (no storage). Service worker
-(`@vite-pwa/astro`) precaches the published shell for **offline viewing**.
+small **Preact** island over a build-time text index (no storage). **Offline
+viewing is out of scope for v1** (no service worker / PWA / precache).
 **Prohibited**: IndexedDB / localStorage / sessionStorage. Astro note:
 `output: 'hybrid'` no longer exists in Astro 5 — Keystatic's on-demand routes
 (`/keystatic`, `/api/keystatic`) + `@astrojs/react` + `@astrojs/node` adapter are

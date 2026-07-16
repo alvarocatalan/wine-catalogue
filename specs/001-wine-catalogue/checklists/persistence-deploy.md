@@ -16,7 +16,7 @@
 - [x] CHK003 - Are requirements defined for the fallback image when a wine image is missing or fails to load? [Completeness, Spec §FR-013] ✓ — FR-013 + Edge Cases (placeholder).
 - [x] CHK004 - Is a requirement defined for what happens to a wine's image file when the wine entry is deleted (orphaned-asset handling)? [Gap] ✓ — Assumptions "Out of scope for v1": manual cleanup (conscious decision).
 - [x] CHK005 - Are requirements defined for how image files are named/located to avoid collisions between entries (e.g., duplicate wines)? [Gap] ✓ — Assumptions + VERIFIED: Keystatic namespaces images in a per-slug subfolder (`src/assets/vinos/<slug>/`).
-- [x] CHK006 - Is it specified whether images must be included in the offline precache alongside published pages? [Coverage, Spec §Edge Cases] ✓ — Edge Cases + FR-012 ("published catalogue including images … offline via precache").
+- [x] CHK006 - Is it specified whether images must be included in the offline precache alongside published pages? [Coverage] → **N/A for v1**: offline viewing descoped (2026-07-16) — no precache, so this no longer applies.
 
 ## Image Persistence — Clarity & Measurability
 
@@ -47,8 +47,8 @@
 
 - [x] CHK023 - Do the image-persistence (§FR-014), no-browser-storage (§FR-012), and static-deploy (§FR-020) requirements form a consistent chain (upload → committed file → built static asset → deployed) with no contradictions? [Consistency] ✓ — FR-012/FR-014/FR-020 are cross-referenced and consistent.
 - [x] CHK024 - Is the "independent of any external URL" image requirement (§FR-014) consistent with serving images as static assets from a CDN/host? [Consistency, Spec §FR-014] ✓ — FR-014 (committed static asset served by the site; no external URL).
-- [x] CHK025 - Is the PWA precache (HTTP cache) clearly distinguished from the prohibited browser storage so the two requirements do not appear to conflict? [Conflict, Spec §FR-012, §Edge Cases] ✓ — FR-012 + Edge Cases (precache = HTTP cache, not system-of-record storage).
-- [x] CHK026 - Are the offline-viewing requirement (images available offline) and the git-persistence requirement consistent about what is cached vs. what is the source of record? [Consistency, Spec §FR-012] ✓ — FR-012 + Assumptions (git = source of record; precache = viewing copy).
+- [x] CHK025 - Is the PWA precache (HTTP cache) clearly distinguished from the prohibited browser storage so the two requirements do not appear to conflict? [Conflict] → **N/A for v1**: no PWA/precache (offline descoped). The browser-storage prohibition (FR-012 / Constitution VI) stands on its own.
+- [x] CHK026 - Are the offline-viewing requirement and the git-persistence requirement consistent about what is cached vs. what is the source of record? [Consistency] → **N/A for v1**: offline viewing descoped; git remains the single source of record (FR-012 / Constitution VI), no caching layer.
 - [x] CHK027 - Do the spec's field-level requirements and the plan's Keystatic/Zod schema agree on which fields exist (including the image and its alt text)? [Consistency, Spec §Key Entities] ✓ — FR-001/FR-002 + Key Entities + FR-021/FR-022 match the plan/contracts field set.
 
 ## Acceptance Criteria & Traceability

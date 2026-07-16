@@ -11,7 +11,7 @@
 
 | Route | Renders | Requirements |
 |---|---|---|
-| `/` | `BaseLayout` + `WineGrid` (server-rendered cards) + mounted `CatalogueSearch` island; registers the service worker; empty state when no entries. | FR-004, FR-006, FR-008, FR-015, FR-016, FR-017 |
+| `/` | `BaseLayout` + `WineGrid` (server-rendered cards) + mounted `CatalogueSearch` island; empty state when no entries. | FR-004, FR-006, FR-008, FR-015, FR-016, FR-017 |
 | `/vinos/[slug]` | Per-wine detail: full optimised `<Image/>` (or placeholder), all four fields, rendered `notas`. Statically generated via `getStaticPaths()` over `vinos`. | FR-005, FR-013, FR-020, FR-022 |
 
 Visitors are **read-only** and unauthenticated (FR-019). There is **no server

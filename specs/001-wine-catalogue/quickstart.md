@@ -71,8 +71,8 @@ state, no `/vinos/<slug>`); `git checkout HEAD -- …` + rebuild brings it back
   matched. (FR-006, FR-007)
 - **Filter**: pick an añada, D.O., or bodega; combine with search; **Clear**
   resets everything. (FR-008, FR-009)
-- **Offline**: after the first visit, the published catalogue is viewable offline
-  via precache. Authoring requires connectivity. (FR-012)
+- **Online only**: the catalogue is consulted online; offline viewing is out of
+  scope for v1 (no PWA/precache). Authoring requires connectivity. (FR-012)
 
 ## Verify the critical path (matches the e2e test — runs against the built site)
 
@@ -104,11 +104,11 @@ src/
 ├── assets/vinos/         # co-located images (versioned in git; optimised by astro:assets)
 ├── lib/                  # schema (Zod, single source), vintage, search (pure)
 ├── components/           # WineCard/WineGrid (.astro), CatalogueSearch (Preact island), EmptyState, Placeholder
-├── layouts/              # BaseLayout.astro (shell + PWA registration)
+├── layouts/              # BaseLayout.astro (shell)
 ├── pages/                # index.astro, vinos/[slug].astro (getStaticPaths)
 └── styles/               # global.css — plain CSS design tokens (no Tailwind; discarded for v1)
 keystatic.config.ts       # Keystatic schema (mirrors src/lib/schema.ts), storage: local
 astro.config.mjs          # output: 'static'; markdoc always; react()+keystatic()+node adapter DEV-ONLY
-public/                   # placeholder.svg, manifest.webmanifest
+public/                   # placeholder.svg
 tests/                    # unit + island + e2e
 ```
