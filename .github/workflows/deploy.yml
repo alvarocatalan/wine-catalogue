@@ -1,0 +1,50 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Least privilege + the tokens GitHub Pages deployment needs.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One Pages deploy at a time; never cancel an in-flight publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # Constitution VI gate — fail fast (no deps needed) before the build.
+      - name: Guard — no browser storage in source (Constitution VI)
+        run: node scripts/check-no-storage.mjs
+
+      # Installs deterministically (npm ci, from the committed package-lock.json),
+      # runs the build, and uploads the Pages artifact. build-cmd = `npm run build`
+      # so the prebuild image gate (FR-014) runs in CI too; the build script sets
+      # SKIP_KEYSTATIC=true → pure static output, no /keystatic route (FR-023).
+      - name: Build static site
+        uses: withastro/action@v6
+        with:
+          build-cmd: npm run build
+        env:
+          SKIP_KEYSTATIC: 'true'
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

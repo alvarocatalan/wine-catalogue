@@ -41,7 +41,7 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 - [x] T006 Add `@astrojs/markdoc` integration to `astro.config.mjs` (always on — renders `.mdoc` bodies).
 - [x] T007 Wire the **dev-only** CMS stack in `astro.config.mjs`: conditionally include `@astrojs/react`, `@keystatic/astro`, and the `@astrojs/node` adapter **only when `SKIP_KEYSTATIC !== 'true'`** (Keystatic's official "disable admin UI in production" recipe), so a build with `SKIP_KEYSTATIC=true` mounts no `/keystatic` route and emits pure static output. Also set `site: 'https://alvarocatalan.github.io'` and `base: '/wine-catalog/'` (GitHub Pages project pages) (research Decision 2; FR-019, FR-020, FR-023, Constitution V).
 - [x] ~~T008 [P] Add `@vite-pwa/astro` (offline precache)~~ — **OUT OF SCOPE for v1 (descoped, won't do).** Offline viewing removed from scope (product decision 2026-07-16): the catalogue is consulted online — no service worker / PWA / precache. Persistence + the no-browser-storage rule are unaffected (FR-012; research Decision 9).
-- [ ] T009 [P] Add a CI guard script that greps the built `dist/` and `src/` for `indexedDB|localStorage|sessionStorage` and fails on any match (Constitution VI).
+- [x] T009 [P] Storage guard (Constitution VI): `scripts/check-no-storage.mjs` scans **`src/` only** (never node_modules/dist — avoids false positives from bundled deps) for `indexedDB|localStorage|sessionStorage`, **strips comments first** (no false positive on negation mentions), and fails with `file:line`. Wired as a fail-fast step in `deploy.yml`; unit-tested (`tests/unit/no-storage-guard.test.ts`, incl. that it actually rejects a real usage).
 
 ---
 
@@ -173,10 +173,10 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 **Purpose**: Publish the static site on push to `main` (FR-020), with the admin panel excluded (FR-023). Deploy is **in scope for v1**.
 
 - [x] T050 Define the production build to run with `SKIP_KEYSTATIC=true` in `package.json` (pure static, no `/keystatic`); the `@astrojs/node` adapter stays reserved for the local-dev panel only (FR-019, FR-020, FR-023).
-- [ ] T051 Create `.github/workflows/deploy.yml`: triggers `push` to `main` + `workflow_dispatch`; `permissions: { contents: read, pages: write, id-token: write }`; build job = `actions/checkout@v7` → `withastro/action@v6` (with env `SKIP_KEYSTATIC=true`); deploy job = `actions/deploy-pages@v5` (versions verified against Astro docs, 2026) (FR-019, FR-020).
+- [x] T051 Create `.github/workflows/deploy.yml`: triggers `push` to `main` + `workflow_dispatch`; `permissions: { contents: read, pages: write, id-token: write }`; build job = `actions/checkout@v7` → `withastro/action@v6` (with env `SKIP_KEYSTATIC=true`); deploy job = `actions/deploy-pages@v5` (versions verified against Astro docs, 2026) (FR-019, FR-020).
 - [x] T052 Ensure the client search index (build-time JSON embedded by `index.astro`, research Decision 7 — **in-memory island, not Pagefind**) is produced by the CI build and included in the deployed `dist/` artifact (FR-006, FR-007).
-- [ ] T053 [P] Document the one-time manual step to enable GitHub Pages (repo **Settings → Pages → Source: GitHub Actions**) in `README.md`/`quickstart.md` (FR-020).
-- [ ] T054 Add a deployment smoke test `tests/e2e/deploy-static.spec.ts` (or a CI shell check): a local `SKIP_KEYSTATIC=true` build asserts `dist/` is static, the `/keystatic` route is **absent**, and the client search index is **present** in the output (FR-020, FR-023, Constitution V/VI).
+- [x] T053 [P] Document the one-time manual step to enable GitHub Pages (repo **Settings → Pages → Source: GitHub Actions**) in `README.md`/`quickstart.md` (FR-020).
+- [x] T054 Published-site smoke `tests/e2e/deploy-smoke.spec.ts` — runs against the **LIVE** URL via `DEPLOY_URL` (skipped locally): home loads, a detail page (`/vinos/unico/`) loads with its optimised `.webp` under the `/wine-catalog/` **base**, and the search island **hydrates + filters** (no-results). (The local static assertions — `dist` static, no `/keystatic`, index present — are already covered by the build smoke tests.) (FR-020, FR-023, Constitution V)
 
 **Checkpoint**: Push to `main` publishes the static catalogue to GitHub Pages with no admin panel and no server runtime.
 

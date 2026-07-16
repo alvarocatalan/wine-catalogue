@@ -85,6 +85,38 @@ state, no `/vinos/<slug>`); `git checkout HEAD -- …` + rebuild brings it back
 7. Confirm the built `./dist` is **static only** (no server entry / adapter output). (Constitution V)
 8. Grep the build for `indexedDB|localStorage|sessionStorage` → **no matches**. (Constitution VI)
 
+## Deploy (GitHub Pages via GitHub Actions)
+
+**One-time manual step (yours — not automatable):** in the GitHub repo, go to
+**Settings → Pages → Build and deployment → Source: GitHub Actions**. This tells
+GitHub Pages to publish from the Actions workflow. (T053)
+
+**How it deploys:** `.github/workflows/deploy.yml` runs on **push to `main`**
+(and manual **workflow_dispatch**):
+
+1. Storage guard (`node scripts/check-no-storage.mjs`) — fails fast if any
+   browser storage sneaks into `src/` (Constitution VI).
+2. `withastro/action@v6` — `npm ci` (from the committed `package-lock.json`) +
+   `npm run build` (image gate + `SKIP_KEYSTATIC=true` → pure static, no
+   `/keystatic`) + uploads the Pages artifact.
+3. `actions/deploy-pages@v5` publishes to
+   `https://alvarocatalan.github.io/wine-catalog/`.
+
+Action versions verified against Astro's docs (checkout@v7, withastro/action@v6,
+deploy-pages@v5). `base: '/wine-catalog/'` is set in `astro.config.mjs` for the
+production build.
+
+**Post-deploy smoke (T054)** — verify the **published** site, not the local build:
+
+```bash
+DEPLOY_URL=https://alvarocatalan.github.io/wine-catalog/ \
+  npx playwright test tests/e2e/deploy-smoke.spec.ts
+```
+
+It checks: the home page loads; a detail page (`/vinos/unico/`) loads with its
+optimised `.webp` image under the correct `/wine-catalog/` base; and the search
+island hydrates and filters (no-results state). Skipped when `DEPLOY_URL` is unset.
+
 ## Tests
 
 ```bash
