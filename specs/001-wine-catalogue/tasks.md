@@ -33,13 +33,13 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 
 **Purpose**: Initialise the Astro project and toolchain.
 
-- [ ] T001 Initialise Astro 5 project at repo root: `package.json`, `astro.config.mjs` with default `output: 'static'`, `tsconfig.json` (`strict`), and `src/` tree per plan.md.
+- [x] T001 Initialise Astro 5 project at repo root: `package.json`, `astro.config.mjs` with default `output: 'static'`, `tsconfig.json` (`strict`), and `src/` tree per plan.md.
 - [x] ~~T002 [P] Add Tailwind CSS 4 via `@tailwindcss/vite`~~ — **OUT OF SCOPE for v1 (descoped, won't do).** Decision: v1 styles with **plain CSS + custom-property tokens** (`src/styles/global.css`), which already meets FR-015 + WCAG AA. Tailwind evaluated and discarded (small UI surface; integration cost unjustified). `global.css` with the design tokens was created as part of US2/T017.
 - [ ] T003 [P] Configure ESLint + Prettier and an `astro check` script; add all `npm` scripts (dev/build/preview/test/test:island/test:e2e/lint/perf) per quickstart.md.
 - [x] T004 [P] Configure Vitest in `vitest.config.ts` (node env for `src/lib`, jsdom for the island).
 - [x] T005 [P] Configure Playwright + `axe-core` in `playwright.config.ts` (runs against the built static preview). ✅ Playwright + axe done. **Lighthouse CI (`lighthouserc.json`) is NOT part of this task — moved to T045.**
-- [ ] T006 Add `@astrojs/markdoc` integration to `astro.config.mjs` (always on — renders `.mdoc` bodies).
-- [ ] T007 Wire the **dev-only** CMS stack in `astro.config.mjs`: conditionally include `@astrojs/react`, `@keystatic/astro`, and the `@astrojs/node` adapter **only when `SKIP_KEYSTATIC !== 'true'`** (Keystatic's official "disable admin UI in production" recipe), so a build with `SKIP_KEYSTATIC=true` mounts no `/keystatic` route and emits pure static output. Also set `site: 'https://alvarocatalan.github.io'` and `base: '/wine-catalog/'` (GitHub Pages project pages) (research Decision 2; FR-019, FR-020, FR-023, Constitution V).
+- [x] T006 Add `@astrojs/markdoc` integration to `astro.config.mjs` (always on — renders `.mdoc` bodies).
+- [x] T007 Wire the **dev-only** CMS stack in `astro.config.mjs`: conditionally include `@astrojs/react`, `@keystatic/astro`, and the `@astrojs/node` adapter **only when `SKIP_KEYSTATIC !== 'true'`** (Keystatic's official "disable admin UI in production" recipe), so a build with `SKIP_KEYSTATIC=true` mounts no `/keystatic` route and emits pure static output. Also set `site: 'https://alvarocatalan.github.io'` and `base: '/wine-catalog/'` (GitHub Pages project pages) (research Decision 2; FR-019, FR-020, FR-023, Constitution V).
 - [ ] T008 [P] Add `@vite-pwa/astro`: `public/manifest.webmanifest` + Workbox precache of the published shell/pages/images (view-only offline) (FR-012, research Decision 9).
 - [ ] T009 [P] Add a CI guard script that greps the built `dist/` and `src/` for `indexedDB|localStorage|sessionStorage` and fails on any match (Constitution VI).
 
@@ -52,12 +52,12 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
 - [x] T010 [P] Write failing unit test for the vintage validator in `tests/unit/vintage.test.ts` (`NV`, valid `YYYY`, invalid strings, future-year flag) (FR-003).
-- [ ] T011 [P] Write failing unit test for the Zod schema in `tests/unit/schema.test.ts` (required fields reject empty — including `foto` and `fotoAlt`; `anada` regex) (FR-002, FR-003, FR-021).
-- [ ] T012 Create the shared Zod schema in `src/lib/schema.ts`: `wineFrontmatter`, `VINTAGE` regex, and `WINE_FIELDS` (nombre, bodega, denominacionOrigen, anada, foto, fotoAlt, notas) — makes T011 pass (contracts/wine-schema.md).
+- [x] ~~T011 [P] Write failing unit test for the Zod schema in `tests/unit/schema.test.ts`~~ — **covered de facto** by `content-validate.test.ts` (T020: required fields + `anada` regex) + `schema-parity.test.ts` (T019). No separate `schema.test.ts` needed (FR-002, FR-003, FR-021).
+- [x] T012 Create the shared Zod schema in `src/lib/schema.ts`: `wineFrontmatter`, `VINTAGE` regex, and `WINE_FIELDS` (nombre, bodega, denominacionOrigen, anada, foto, fotoAlt, notas) — makes T011 pass (contracts/wine-schema.md).
 - [x] T013 Implement the vintage validator in `src/lib/vintage.ts` (`NV`/`YYYY` + `anadaIsFuture`) — makes T010 pass.
-- [ ] T014 Create the `vinos` Content Layer collection in `src/content.config.ts` (glob `**/*.mdoc` over `src/content/vinos`, schema `({ image }) => …` using `wineFrontmatter` + `foto: image()`) (data-model.md).
-- [ ] T015 Create `keystatic.config.ts` (local mode) mirroring the schema: seven fields, `slugField: 'nombre'`, `format: { contentField: 'notas' }`, `fields.image` with `directory: 'src/assets/vinos'` + `publicPath`, `isRequired` flags (contracts/wine-schema.md; FR-014, FR-018).
-- [ ] T016 Create content dirs `src/content/vinos/` and `src/assets/vinos/` (with `.gitkeep`) versioned in git (FR-012).
+- [x] T014 Create the `vinos` Content Layer collection in `src/content.config.ts` (glob `**/*.mdoc` over `src/content/vinos`, schema `({ image }) => …` using `wineFrontmatter` + `foto: image()`) (data-model.md).
+- [x] T015 Create `keystatic.config.ts` (local mode) mirroring the schema: seven fields, `slugField: 'nombre'`, `format: { contentField: 'notas' }`, `fields.image` with `directory: 'src/assets/vinos'` + `publicPath`, `isRequired` flags (contracts/wine-schema.md; FR-014, FR-018).
+- [x] T016 Create content dirs `src/content/vinos/` and `src/assets/vinos/` (with `.gitkeep`) versioned in git (FR-012).
 - [x] T017 Create `src/layouts/BaseLayout.astro` (head, tokens) and `public/placeholder.svg` (image-failure fallback) (FR-013, FR-015). **Note:** FR-013 is covered by `placeholder.svg` + inline `onerror` on `<Image>` — **no separate `Placeholder.astro` component**. Service-worker registration deferred to T008 (PWA).
 - [x] T018 **De-risk the image seam (research Decision 4)**: add one fixture wine (`.mdoc` + image), run `astro build`, and assert it produces an optimised `<img>` with a hashed `src` and the correct `alt`; fix `publicPath`/`directory` until the `image()` helper resolves.
 
@@ -172,9 +172,9 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 
 **Purpose**: Publish the static site on push to `main` (FR-020), with the admin panel excluded (FR-023). Deploy is **in scope for v1**.
 
-- [ ] T050 Define the production build to run with `SKIP_KEYSTATIC=true` in `package.json` (pure static, no `/keystatic`); the `@astrojs/node` adapter stays reserved for the local-dev panel only (FR-019, FR-020, FR-023).
+- [x] T050 Define the production build to run with `SKIP_KEYSTATIC=true` in `package.json` (pure static, no `/keystatic`); the `@astrojs/node` adapter stays reserved for the local-dev panel only (FR-019, FR-020, FR-023).
 - [ ] T051 Create `.github/workflows/deploy.yml`: triggers `push` to `main` + `workflow_dispatch`; `permissions: { contents: read, pages: write, id-token: write }`; build job = `actions/checkout@v7` → `withastro/action@v6` (with env `SKIP_KEYSTATIC=true`); deploy job = `actions/deploy-pages@v5` (versions verified against Astro docs, 2026) (FR-019, FR-020).
-- [ ] T052 Ensure the client search index (build-time JSON embedded by `index.astro`, research Decision 7 — **in-memory island, not Pagefind**) is produced by the CI build and included in the deployed `dist/` artifact (FR-006, FR-007).
+- [x] T052 Ensure the client search index (build-time JSON embedded by `index.astro`, research Decision 7 — **in-memory island, not Pagefind**) is produced by the CI build and included in the deployed `dist/` artifact (FR-006, FR-007).
 - [ ] T053 [P] Document the one-time manual step to enable GitHub Pages (repo **Settings → Pages → Source: GitHub Actions**) in `README.md`/`quickstart.md` (FR-020).
 - [ ] T054 Add a deployment smoke test `tests/e2e/deploy-static.spec.ts` (or a CI shell check): a local `SKIP_KEYSTATIC=true` build asserts `dist/` is static, the `/keystatic` route is **absent**, and the client search index is **present** in the output (FR-020, FR-023, Constitution V/VI).
 
