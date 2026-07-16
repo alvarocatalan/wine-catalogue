@@ -24,9 +24,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Dev-mode regression guard: drives `astro dev` (React/Keystatic + Preact both
-  # active) to prove the search island still hydrates — a failure the production
-  # preview never sees. Runs on every push/PR and gates the build/deploy below.
+  # Quality gate: lint, unit/component tests, the production-preview e2e suite, and
+  # the dev-mode island-hydration e2e (drives `astro dev` — a failure the preview
+  # never sees). Runs on every push/PR and gates the build/deploy below.
   test:
     runs-on: ubuntu-latest
     steps:
@@ -44,6 +44,15 @@ jobs:
 
       - name: Install Playwright (Chromium)
         run: npx playwright install --with-deps chromium
+
+      - name: Lint (astro check + eslint + prettier)
+        run: npm run lint
+
+      - name: Unit + component tests (Vitest)
+        run: npm test
+
+      - name: Preview e2e (build + Playwright over the static site)
+        run: npm run test:e2e
 
       - name: Dev-mode e2e (island hydration under `astro dev`)
         run: npm run test:e2e:dev
