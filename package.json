@@ -17,6 +17,7 @@
     "lint": "astro check && eslint . && prettier --check .",
     "format": "prettier --write .",
     "validate:images": "node scripts/validate-images.mjs",
+    "verify:static": "node scripts/verify-static.mjs",
     "gen:fixture": "node scripts/gen-fixture.mjs"
   },
   "dependencies": {
