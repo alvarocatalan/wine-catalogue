@@ -121,16 +121,16 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 
 ### Tests for User Story 3 ⚠️ (write first, must fail)
 
-- [ ] T033 [P] [US3] Write failing unit tests `tests/unit/search.test.ts`: case-insensitive partial match across nombre/bodega/denominacionOrigen/anada; which-field-matched; `displayed = filterSet ∩ searchResults` (FR-006, FR-007, FR-008, FR-009).
-- [ ] T034 [P] [US3] Write failing component test `tests/component/catalogue-search.test.tsx` (`@testing-library/preact`): typing filters visible cards; Clear resets; `aria-live` announces changes (FR-006, FR-009, Principle III).
-- [ ] T035 [P] [US3] Write failing e2e test `tests/e2e/search-filter.spec.ts`: search + filter + clear + no-results over the built site (FR-006–FR-009, FR-016).
+- [x] T033 [P] [US3] Write failing unit tests `tests/unit/search.test.ts`: case-insensitive partial match across nombre/bodega/denominacionOrigen/anada; which-field-matched; `displayed = filterSet ∩ searchResults` (FR-006, FR-007, FR-008, FR-009).
+- [x] T034 [P] [US3] Write failing component test `tests/component/catalogue-search.test.tsx` (`@testing-library/preact`): typing filters visible cards; Clear resets; `aria-live` announces changes (FR-006, FR-009, Principle III).
+- [x] T035 [P] [US3] Write failing e2e test `tests/e2e/search-filter.spec.ts`: search + filter + clear + no-results over the built site (FR-006–FR-009, FR-016).
 
 ### Implementation for User Story 3
 
-- [ ] T036 [US3] Implement pure search/filter logic in `src/lib/search.ts` (match, field-match, facet derivation, compose) — makes T033 pass (FR-006, FR-007, FR-008).
-- [ ] T037 [US3] Emit a build-time text index (`{ slug, nombre, bodega, denominacionOrigen, anada }`) from `index.astro` for the island (research Decision 7).
-- [ ] T038 [US3] Create the Preact island `src/components/CatalogueSearch.tsx` (`@preact/signals`): search box + facets + Clear; filters cards in memory (visibility toggle); `aria-live`; **no storage** — makes T034 pass (FR-006, FR-008, FR-009, Constitution VI).
-- [ ] T039 [US3] Mount the island in `WineGrid.astro`/`index.astro` and wire `data-*` attributes + no-results state — makes T035 pass (FR-007, FR-016).
+- [x] T036 [US3] Implement pure search/filter logic in `src/lib/search.ts` (match, field-match, facet derivation, compose) — makes T033 pass (FR-006, FR-007, FR-008).
+- [x] T037 [US3] Emit a build-time text index (`{ slug, nombre, bodega, denominacionOrigen, anada }`) from `index.astro` for the island (research Decision 7).
+- [x] T038 [US3] Create the Preact island `src/components/CatalogueSearch.tsx` (`@preact/signals`): search box + facets + Clear; filters cards in memory (visibility toggle); `aria-live`; **no storage** — makes T034 pass (FR-006, FR-008, FR-009, Constitution VI).
+- [x] T039 [US3] Mount the island in `WineGrid.astro`/`index.astro` and wire `data-*` attributes + no-results state — makes T035 pass (FR-007, FR-016).
 
 **Checkpoint**: Search + filter work in memory over the static grid; US1/US2 still pass.
 

@@ -14,6 +14,7 @@ const future = anadaIsFuture(anada);
 
 <li
   class="card"
+  data-slug={wine.id}
   data-nombre={nombre}
   data-bodega={bodega}
   data-do={denominacionOrigen}
@@ -31,6 +32,7 @@ const future = anadaIsFuture(anada);
       <p class="card__name">{nombre}</p>
       <p class="card__meta">{bodega} · {anada}</p>
       {future && <span class="flag">añada futura</span>}
+      <span class="card__match" hidden></span>
     </div>
   </a>
 </li>

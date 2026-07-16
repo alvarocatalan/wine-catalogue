@@ -2,13 +2,14 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import WineGrid from '../components/WineGrid.astro';
+import CatalogueSearch from '../components/CatalogueSearch.tsx';
 
 const wines = (await getCollection('vinos')).sort(
   (a, b) => +new Date(b.data.createdAt) - +new Date(a.data.createdAt),
 );
 
-// Build-time text search index consumed by the in-memory search island (US3, T037).
-// Embedded JSON — NOT Pagefind (research Decision 7).
+// Build-time text search index consumed by the in-memory search island (T037).
+// Embedded JSON — NOT Pagefind (research Decision 7). The island hydrates over it.
 const searchIndex = wines.map((w) => ({
   slug: w.id,
   nombre: w.data.nombre,
@@ -21,7 +22,11 @@ const searchIndex = wines.map((w) => ({
 <BaseLayout title="Catálogo de vinos">
   <main class="wrap">
     <h1 class="site-title">Catálogo de vinos</h1>
+    {wines.length > 0 && <CatalogueSearch client:load />}
     <WineGrid wines={wines} />
+    <div id="no-results" class="empty" hidden role="status">
+      <p>Sin resultados. Prueba con otro término o quita los filtros.</p>
+    </div>
   </main>
   <script
     type="application/json"

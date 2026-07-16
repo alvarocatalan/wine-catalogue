@@ -1,11 +1,14 @@
 import { defineConfig } from 'astro/config';
 import markdoc from '@astrojs/markdoc';
+import preact from '@astrojs/preact';
 
 // Keystatic + its React admin UI + Node adapter are wired ONLY in dev.
 // A production build sets SKIP_KEYSTATIC=true → pure static output, no /keystatic.
 const SKIP_KEYSTATIC = process.env.SKIP_KEYSTATIC === 'true';
 
-const integrations = [markdoc()];
+// Preact renders the public search/filter island. Scoped to src/components so it
+// never collides with Keystatic's React renderer (dev-only) over .tsx files.
+const integrations = [markdoc(), preact({ include: ['**/components/**'] })];
 let adapter;
 
 if (!SKIP_KEYSTATIC) {

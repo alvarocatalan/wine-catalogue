@@ -101,6 +101,54 @@ a {
   color: var(--muted);
 }
 
+/* Search / filter island */
+.search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.search__input {
+  flex: 1 1 260px;
+  min-width: 200px;
+  padding: 0.5rem 0.7rem;
+  font-size: 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--fg);
+}
+.search select {
+  padding: 0.5rem 0.6rem;
+  font-size: 0.95rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--fg);
+}
+.search .clear {
+  padding: 0.5rem 0.8rem;
+  font-size: 0.95rem;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--accent);
+  cursor: pointer;
+}
+.search__status {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.card__match {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--accent);
+}
+
 .back {
   display: inline-block;
   margin-bottom: 1rem;
