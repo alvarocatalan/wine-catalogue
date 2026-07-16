@@ -33,9 +33,33 @@ npm run preview    # serve the production static build locally
    `src/assets/vinos/`.
 4. **Commit and push** those files — that is the publish step; the static site
    rebuilds/redeploys from the commit. (FR-012, FR-018, FR-020)
-5. **Edit / Delete**: same panel; delete has a confirmation step. To recover a
-   deleted wine, revert the commit (git history) — there is no in-app undo.
-   (FR-010, FR-011)
+5. **Edit**: open the wine in Keystatic, change fields (or replace the image),
+   save, then commit and push. The change is reflected on the site after the
+   rebuild/redeploy. `createdAt` is preserved (the catalogue order stays stable).
+   (FR-010, FR-025)
+6. **Delete**: open the wine in Keystatic → delete → confirm. The removal is a
+   commit. There is **no in-app undo**. (FR-011)
+
+### Recovering a deleted (or wrongly edited) wine — git procedure (FR-011)
+
+Recovery is via git history, not an in-app undo. The content lives in the repo,
+so any past state is restorable:
+
+- **Undo a not-yet-pushed delete/edit** (working tree): restore the files from
+  the last commit —
+  `git checkout HEAD -- src/content/vinos/<slug>.mdoc src/assets/vinos/<slug>`
+- **Undo an already-pushed delete/edit**: revert the offending commit —
+  `git revert <sha>` (then push). The wine reappears on the next redeploy.
+- Find the commit with `git log -- src/content/vinos/<slug>.mdoc`.
+
+Verified: deleting the fixture and rebuilding removes it from the site (empty
+state, no `/vinos/<slug>`); `git checkout HEAD -- …` + rebuild brings it back
+(card + detail page).
+
+> **Orphaned images (out of scope for v1, conscious decision):** deleting a wine
+> in Keystatic removes its `.mdoc`; the co-located image folder
+> `src/assets/vinos/<slug>/` is **removed manually** (`git rm -r` it in the same
+> commit). No automatic cleanup in v1. (Assumptions)
 
 ## Browse (public, static)
 

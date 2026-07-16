@@ -144,14 +144,14 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 
 ### Tests for User Story 4 ⚠️ (write first, must fail)
 
-- [ ] T040 [P] [US4] Write failing integration test `tests/e2e/edit-reflects.spec.ts`: editing a fixture `.mdoc` field is reflected on grid + detail after build (FR-010).
-- [ ] T041 [P] [US4] Write failing test `tests/unit/created-at.test.ts`: editing preserves `createdAt` (ordering stable) (Key Entities).
+- [x] T040 [P] [US4] Write failing integration test `tests/e2e/edit-reflects.spec.ts`: editing a fixture `.mdoc` field is reflected on grid + detail after build (FR-010).
+- [x] T041 [P] [US4] Write failing test `tests/unit/created-at.test.ts`: editing preserves `createdAt` (ordering stable) (Key Entities).
 
 ### Implementation for User Story 4
 
-- [ ] T042 [US4] Confirm Keystatic edit flow updates the `.mdoc`/image in place and preserves `createdAt` — makes T040/T041 pass (FR-010).
-- [ ] T043 [US4] Confirm the Keystatic delete flow has a confirmation step; document git-history/revert as the recovery path (no in-session undo) in `quickstart.md` (FR-011; Clarifications 2026-07-15).
-- [ ] T044 [US4] Document the manual orphaned-image cleanup on delete (out of scope for v1, conscious decision) in `quickstart.md` (Assumptions).
+- [x] T042 [US4] Confirm Keystatic edit flow updates the `.mdoc`/image in place and preserves `createdAt` — makes T040/T041 pass (FR-010).
+- [x] T043 [US4] Confirm the Keystatic delete flow has a confirmation step; document git-history/revert as the recovery path (no in-session undo) in `quickstart.md` (FR-011; Clarifications 2026-07-15).
+- [x] T044 [US4] Document the manual orphaned-image cleanup on delete (out of scope for v1, conscious decision) in `quickstart.md` (Assumptions).
 - [x] T057 [US4] **FR-025 — no dedicated verification required.** Image retention on edit (an existing image is kept unless the administrator explicitly replaces it) is **guaranteed by native Keystatic behaviour**: editing a wine rewrites only the `.mdoc`; the co-located image file is untouched unless a new one is uploaded. Verified there is **no custom image processing in the edit-save flow** that could interfere — `astro:assets` optimisation and the FR-014 build gate run at build time, not on save. No test needed (would only re-assert Keystatic's own behaviour).
 
 **Checkpoint**: Full authoring lifecycle (create/edit/delete + recovery) works; all stories independently testable.

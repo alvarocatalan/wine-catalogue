@@ -3,10 +3,9 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import WineGrid from '../components/WineGrid.astro';
 import CatalogueSearch from '../components/CatalogueSearch.tsx';
+import { orderByNewest } from '../lib/order';
 
-const wines = (await getCollection('vinos')).sort(
-  (a, b) => +new Date(b.data.createdAt) - +new Date(a.data.createdAt),
-);
+const wines = orderByNewest(await getCollection('vinos'));
 
 // Build-time text search index consumed by the in-memory search island (T037).
 // Embedded JSON — NOT Pagefind (research Decision 7). The island hydrates over it.
