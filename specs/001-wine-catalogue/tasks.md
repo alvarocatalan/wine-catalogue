@@ -39,7 +39,7 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 - [x] T004 [P] Configure Vitest in `vitest.config.ts` (node env for `src/lib`, jsdom for the island).
 - [ ] T005 [P] Configure Playwright + `axe-core` in `playwright.config.ts` (runs against the built static preview) and Lighthouse CI in `lighthouserc.json` with the budgets from research Decision 11.
 - [ ] T006 Add `@astrojs/markdoc` integration to `astro.config.mjs` (always on — renders `.mdoc` bodies).
-- [ ] T007 Wire the **dev-only** CMS stack in `astro.config.mjs`: conditionally include `@astrojs/react`, `@keystatic/astro`, and the `@astrojs/node` adapter **only when `SKIP_KEYSTATIC !== 'true'`** (Keystatic's official "disable admin UI in production" recipe), so a build with `SKIP_KEYSTATIC=true` mounts no `/keystatic` route and emits pure static output. Also set `site: 'https://alvarocatalan.github.io'` and `base: '/wine-catalog/'` (GitHub Pages project pages) (research Decision 2; FR-020, FR-023, Constitution V).
+- [ ] T007 Wire the **dev-only** CMS stack in `astro.config.mjs`: conditionally include `@astrojs/react`, `@keystatic/astro`, and the `@astrojs/node` adapter **only when `SKIP_KEYSTATIC !== 'true'`** (Keystatic's official "disable admin UI in production" recipe), so a build with `SKIP_KEYSTATIC=true` mounts no `/keystatic` route and emits pure static output. Also set `site: 'https://alvarocatalan.github.io'` and `base: '/wine-catalog/'` (GitHub Pages project pages) (research Decision 2; FR-019, FR-020, FR-023, Constitution V).
 - [ ] T008 [P] Add `@vite-pwa/astro`: `public/manifest.webmanifest` + Workbox precache of the published shell/pages/images (view-only offline) (FR-012, research Decision 9).
 - [ ] T009 [P] Add a CI guard script that greps the built `dist/` and `src/` for `indexedDB|localStorage|sessionStorage` and fails on any match (Constitution VI).
 
@@ -73,7 +73,7 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 
 ### Tests for User Story 1 ⚠️ (write first, must fail)
 
-- [x] T019 [P] [US1] Write failing schema-parity test in `tests/unit/schema-parity.test.ts` asserting the Keystatic `vinos` field set equals `WINE_FIELDS` (contracts/wine-schema.md).
+- [x] T019 [P] [US1] Write failing schema-parity test in `tests/unit/schema-parity.test.ts` asserting the Keystatic `vinos` field set equals `WINE_FIELDS` (FR-026, contracts/wine-schema.md).
 - [x] T020 [P] [US1] Write failing content-validation test in `tests/unit/content-validate.test.ts` that a valid fixture `.mdoc` passes the collection schema and an invalid one (missing `bodega`, bad `anada`) fails (FR-001, FR-002, FR-003).
 
 ### Implementation for User Story 1
@@ -152,6 +152,7 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 - [ ] T042 [US4] Confirm Keystatic edit flow updates the `.mdoc`/image in place and preserves `createdAt` — makes T040/T041 pass (FR-010).
 - [ ] T043 [US4] Confirm the Keystatic delete flow has a confirmation step; document git-history/revert as the recovery path (no in-session undo) in `quickstart.md` (FR-011; Clarifications 2026-07-15).
 - [ ] T044 [US4] Document the manual orphaned-image cleanup on delete (out of scope for v1, conscious decision) in `quickstart.md` (Assumptions).
+- [x] T057 [US4] **FR-025 — no dedicated verification required.** Image retention on edit (an existing image is kept unless the administrator explicitly replaces it) is **guaranteed by native Keystatic behaviour**: editing a wine rewrites only the `.mdoc`; the co-located image file is untouched unless a new one is uploaded. Verified there is **no custom image processing in the edit-save flow** that could interfere — `astro:assets` optimisation and the FR-014 build gate run at build time, not on save. No test needed (would only re-assert Keystatic's own behaviour).
 
 **Checkpoint**: Full authoring lifecycle (create/edit/delete + recovery) works; all stories independently testable.
 
@@ -159,7 +160,7 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T045 [P] Run Lighthouse CI against a ~1,000-entry fixture build; confirm LCP ≤ 2.0 s, island JS ≤ 20 KB gz, interaction ≤ 100 ms (SC-002, SC-003, research Decision 11).
+- [ ] T045 [P] Run Lighthouse CI against a ~1,000-entry fixture build; confirm LCP ≤ 2.0 s, island JS ≤ 20 KB gz, interaction ≤ 100 ms (FR-017, SC-002, SC-003, research Decision 11).
 - [ ] T046 [P] Full axe/keyboard a11y sweep across grid, detail, and search (WCAG 2.1 AA) (Principle III).
 - [ ] T047 [P] Verify production `dist/` is static-only (no server entry/adapter output) and the CI storage-API guard (T009) passes (Constitution V, VI; FR-020, FR-023).
 - [ ] T048 [P] Add a `README.md` (author→commit→push→publish flow) and confirm `CLAUDE.md`/`quickstart.md` are current.
@@ -171,8 +172,8 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 
 **Purpose**: Publish the static site on push to `main` (FR-020), with the admin panel excluded (FR-023). Deploy is **in scope for v1**.
 
-- [ ] T050 Define the production build to run with `SKIP_KEYSTATIC=true` in `package.json` (pure static, no `/keystatic`); the `@astrojs/node` adapter stays reserved for the local-dev panel only (FR-020, FR-023).
-- [ ] T051 Create `.github/workflows/deploy.yml`: triggers `push` to `main` + `workflow_dispatch`; `permissions: { contents: read, pages: write, id-token: write }`; build job = `actions/checkout@v7` → `withastro/action@v6` (with env `SKIP_KEYSTATIC=true`); deploy job = `actions/deploy-pages@v5` (versions verified against Astro docs, 2026) (FR-020).
+- [ ] T050 Define the production build to run with `SKIP_KEYSTATIC=true` in `package.json` (pure static, no `/keystatic`); the `@astrojs/node` adapter stays reserved for the local-dev panel only (FR-019, FR-020, FR-023).
+- [ ] T051 Create `.github/workflows/deploy.yml`: triggers `push` to `main` + `workflow_dispatch`; `permissions: { contents: read, pages: write, id-token: write }`; build job = `actions/checkout@v7` → `withastro/action@v6` (with env `SKIP_KEYSTATIC=true`); deploy job = `actions/deploy-pages@v5` (versions verified against Astro docs, 2026) (FR-019, FR-020).
 - [ ] T052 Ensure the client search index (build-time JSON embedded by `index.astro`, research Decision 7 — **in-memory island, not Pagefind**) is produced by the CI build and included in the deployed `dist/` artifact (FR-006, FR-007).
 - [ ] T053 [P] Document the one-time manual step to enable GitHub Pages (repo **Settings → Pages → Source: GitHub Actions**) in `README.md`/`quickstart.md` (FR-020).
 - [ ] T054 Add a deployment smoke test `tests/e2e/deploy-static.spec.ts` (or a CI shell check): a local `SKIP_KEYSTATIC=true` build asserts `dist/` is static, the `/keystatic` route is **absent**, and the client search index is **present** in the output (FR-020, FR-023, Constitution V/VI).
