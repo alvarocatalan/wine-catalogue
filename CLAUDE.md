@@ -4,7 +4,10 @@ shell commands, and other important information, read the current plan:
 `specs/001-wine-catalogue/plan.md`
 
 Active feature: **Wine Catalogue** (`001-wine-catalogue`). Stack: **Astro 5.x**
-(`output: 'static'`) + Tailwind CSS 4.x + TypeScript strict. Aligned with
+(`output: 'static'`) + **plain CSS with custom-property tokens** (`src/styles/global.css`)
++ TypeScript strict. (**Tailwind was evaluated and discarded for v1**: small UI
+surface, plain CSS already meets FR-015 + WCAG AA, integration cost not justified.)
+Aligned with
 **Constitution v1.1.0**: the public site is **fully static**, all content and
 images are **version-controlled files in git**, and authoring is a **git-based
 CMS** with **no runtime backend**. Content management uses **Keystatic**

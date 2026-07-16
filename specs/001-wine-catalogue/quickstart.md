@@ -82,7 +82,7 @@ src/
 ├── components/           # WineCard/WineGrid (.astro), CatalogueSearch (Preact island), EmptyState, Placeholder
 ├── layouts/              # BaseLayout.astro (shell + PWA registration)
 ├── pages/                # index.astro, vinos/[slug].astro (getStaticPaths)
-└── styles/               # Tailwind entry + design tokens
+└── styles/               # global.css — plain CSS design tokens (no Tailwind; discarded for v1)
 keystatic.config.ts       # Keystatic schema (mirrors src/lib/schema.ts), storage: local
 astro.config.mjs          # output: 'static'; markdoc always; react()+keystatic()+node adapter DEV-ONLY
 public/                   # placeholder.svg, manifest.webmanifest

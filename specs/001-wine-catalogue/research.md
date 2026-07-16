@@ -219,7 +219,7 @@ Each decision: **Decision** · **Rationale** · **Alternatives considered**.
 All Technical Context items are resolved; **no NEEDS CLARIFICATION remain**. Lines
 pinned: Astro 5.x (`output: 'static'`), `@astrojs/markdoc`, `@keystatic/core` +
 `@keystatic/astro` (local, dev-only routes) with `@astrojs/react` + `@astrojs/node`
-dev-only, `@astrojs/preact` + `@preact/signals`, Tailwind 4.x, `zod`,
+dev-only, `@astrojs/preact` + `@preact/signals`, plain CSS (`global.css`; Tailwind discarded for v1), `zod`,
 `@vite-pwa/astro`. Exact versions locked in `package.json` at implementation time.
 The one integration seam to validate first is Keystatic image field ↔
 `astro:assets` `image()` (Decision 4).

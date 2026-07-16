@@ -34,7 +34,7 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 **Purpose**: Initialise the Astro project and toolchain.
 
 - [ ] T001 Initialise Astro 5 project at repo root: `package.json`, `astro.config.mjs` with default `output: 'static'`, `tsconfig.json` (`strict`), and `src/` tree per plan.md.
-- [ ] T002 [P] Add Tailwind CSS 4 via `@tailwindcss/vite`; create `src/styles/global.css` with the design tokens (limited palette, spacing, one display + one body font) (FR-015).
+- [x] ~~T002 [P] Add Tailwind CSS 4 via `@tailwindcss/vite`~~ — **OUT OF SCOPE for v1 (descoped, won't do).** Decision: v1 styles with **plain CSS + custom-property tokens** (`src/styles/global.css`), which already meets FR-015 + WCAG AA. Tailwind evaluated and discarded (small UI surface; integration cost unjustified). `global.css` with the design tokens was created as part of US2/T017.
 - [ ] T003 [P] Configure ESLint + Prettier and an `astro check` script; add all `npm` scripts (dev/build/preview/test/test:island/test:e2e/lint/perf) per quickstart.md.
 - [x] T004 [P] Configure Vitest in `vitest.config.ts` (node env for `src/lib`, jsdom for the island).
 - [x] T005 [P] Configure Playwright + `axe-core` in `playwright.config.ts` (runs against the built static preview). ✅ Playwright + axe done. **Lighthouse CI (`lighthouserc.json`) is NOT part of this task — moved to T045.**

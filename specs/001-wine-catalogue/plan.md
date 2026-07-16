@@ -37,14 +37,16 @@ Keystatic injects two on-demand routes (`/keystatic`, `/api/keystatic`,
 wired **conditionally, dev-only**, so the production build stays static with no
 server output. `@astrojs/markdoc` is always present to render `.mdoc` bodies
 (notas). Search/filter is a small client island over a build-time text index.
-Styling is **Tailwind CSS 4** tokens; a **service worker** (`@vite-pwa/astro`)
-precaches the published shell for offline viewing.
+Styling is **plain CSS with custom-property tokens** (`global.css`) — Tailwind was
+evaluated and **discarded for v1** (small UI surface; plain CSS already meets
+FR-015 + WCAG AA; integration cost unjustified at this scale). A **service worker**
+(`@vite-pwa/astro`) precaches the published shell for offline viewing.
 
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x (`strict`); Node 20 LTS for build/test/dev toolchain.
 
-**Primary Dependencies**: Astro 5.x (`output: 'static'`), `@astrojs/markdoc` (always), Content Layer + `astro:assets`; `@keystatic/core` + `@keystatic/astro` (local mode) with `@astrojs/react` + `@astrojs/node` (**dev-only**, for the `/keystatic` panel); `@astrojs/preact` + `@preact/signals` (small public search/filter island); Tailwind CSS 4.x (`@tailwindcss/vite`); `zod` (single shared schema); `@vite-pwa/astro` (service worker + manifest).
+**Primary Dependencies**: Astro 5.x (`output: 'static'`), `@astrojs/markdoc` (always), Content Layer + `astro:assets`; `@keystatic/core` + `@keystatic/astro` (local mode) with `@astrojs/react` + `@astrojs/node` (**dev-only**, for the `/keystatic` panel); `@astrojs/preact` + `@preact/signals` (small public search/filter island); **plain CSS with custom-property tokens** (`src/styles/global.css`) — Tailwind discarded for v1; `zod` (single shared schema); `@vite-pwa/astro` (service worker + manifest).
 
 **Storage**: **Git repository** — `.mdoc` entries in `src/content/vinos/`, images in `src/assets/vinos/`, versioned as files. **No database, no runtime server, and NO IndexedDB / localStorage / sessionStorage** (Constitution VI). Client search state is ephemeral in-memory only.
 
@@ -78,7 +80,7 @@ Gates derived from the **seven** principles in `constitution.md` **v1.1.0**.
 - "Data-integrity" 100% branch rule = Zod schema + vintage validator + schema-parity check, exhaustively tested; 80% line gate elsewhere.
 
 ### III. User Experience Consistency — PASS
-- Single design system via centralised Tailwind tokens; consistent card/detail components.
+- Single design system via centralised CSS custom-property tokens (`global.css`); consistent card/detail components.
 - Documented empty, no-results, and image-failure (placeholder, FR-013) states.
 - WCAG 2.1 AA verified pre-merge (axe in e2e): **alt text is a required field** (`fotoAlt`, FR-021), keyboard-operable search/filter, focus order, `aria-live` on the filtered grid.
 
@@ -151,7 +153,7 @@ src/
 │   └── vinos/
 │       └── [slug].astro             # per-wine detail page (getStaticPaths from `vinos`)
 └── styles/
-    └── global.css                   # Tailwind entry + design tokens
+    └── global.css                   # design tokens (CSS custom properties) — plain CSS, no Tailwind
 
 public/
 ├── placeholder.svg                  # shared image-failure asset
