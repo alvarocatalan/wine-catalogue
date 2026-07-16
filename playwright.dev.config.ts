@@ -12,9 +12,13 @@ export default defineConfig({
   fullyParallel: false,
   use: { baseURL: `http://127.0.0.1:${PORT}/` },
   webServer: {
-    command: `npm run dev -- --port ${PORT}`,
+    // Bind to 127.0.0.1 explicitly so it matches the polled URL (on CI the default
+    // host can resolve to IPv6 ::1 while the poll uses IPv4 → a webServer timeout).
+    command: `npm run dev -- --host 127.0.0.1 --port ${PORT}`,
     url: `http://127.0.0.1:${PORT}/`,
     reuseExistingServer: !process.env.CI,
-    timeout: 90_000,
+    timeout: 120_000,
+    stdout: 'pipe',
+    stderr: 'pipe',
   },
 });

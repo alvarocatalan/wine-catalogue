@@ -13,9 +13,15 @@ export default defineConfig({
   webServer: DEPLOY_URL
     ? undefined
     : {
-        command: 'npm run preview',
+        // Bind the preview to 127.0.0.1 explicitly so it matches the URL Playwright
+        // polls — on CI the default host can resolve to IPv6 (::1) while the poll
+        // uses IPv4, which manifests as a 60s "webServer" timeout.
+        command: 'npm run preview -- --host 127.0.0.1',
         url: LOCAL_URL,
-        reuseExistingServer: true,
-        timeout: 60_000,
+        // In CI always start a fresh server; locally reuse one if already running.
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+        stdout: 'pipe',
+        stderr: 'pipe',
       },
 });
