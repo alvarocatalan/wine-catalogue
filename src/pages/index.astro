@@ -27,9 +27,5 @@ const searchIndex = wines.map((w) => ({
       <p>Sin resultados. Prueba con otro término o quita los filtros.</p>
     </div>
   </main>
-  <script
-    type="application/json"
-    id="wine-search-index"
-    set:html={JSON.stringify(searchIndex)}
-  />
+  <script type="application/json" id="wine-search-index" set:html={JSON.stringify(searchIndex)} />
 </BaseLayout>

@@ -1,0 +1,12 @@
+dist/
+.astro/
+node_modules/
+package-lock.json
+playwright-report/
+test-results/
+# Spec Kit tooling — machine-managed, not our source.
+.specify/
+.claude/
+# Spec docs are hand-wrapped to a fixed column; leave them to the authors.
+specs/
+*.md

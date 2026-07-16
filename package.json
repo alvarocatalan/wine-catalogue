@@ -10,7 +10,11 @@
     "build:cms": "astro build",
     "preview": "SKIP_KEYSTATIC=true astro preview",
     "test": "vitest run",
+    "test:island": "vitest run tests/component",
     "test:e2e": "npm run build && playwright test",
+    "check": "astro check",
+    "lint": "astro check && eslint . && prettier --check .",
+    "format": "prettier --write .",
     "validate:images": "node scripts/validate-images.mjs",
     "gen:fixture": "node scripts/gen-fixture.mjs"
   },
@@ -29,10 +33,22 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.9",
     "@axe-core/playwright": "^4.12.1",
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.61.1",
     "@testing-library/preact": "^3.2.4",
+    "@types/node": "^26.1.1",
+    "astro-eslint-parser": "^3.0.0",
+    "eslint": "^10.7.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-astro": "^3.0.1",
+    "globals": "^17.7.0",
     "jsdom": "^29.1.1",
+    "prettier": "^3.9.5",
+    "prettier-plugin-astro": "^0.14.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.64.0",
     "vitest": "^4.1.10"
   }
 }

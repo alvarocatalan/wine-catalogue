@@ -1,12 +1,26 @@
 // @vitest-environment jsdom
+/** @jsxImportSource preact */
+// Preact component under test — pin JSX types to Preact (React is also present via Keystatic).
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render, fireEvent, cleanup } from '@testing-library/preact';
 import CatalogueSearch from '../../src/components/CatalogueSearch';
 import type { WineIndexEntry } from '../../src/lib/search';
 
 const entries: WineIndexEntry[] = [
-  { slug: 'unico', nombre: 'Único', bodega: 'Vega Sicilia', denominacionOrigen: 'Ribera del Duero DO', anada: '2018' },
-  { slug: 'reserva', nombre: 'Reserva', bodega: 'Marqués de Riscal', denominacionOrigen: 'Rioja DOCa', anada: '2019' },
+  {
+    slug: 'unico',
+    nombre: 'Único',
+    bodega: 'Vega Sicilia',
+    denominacionOrigen: 'Ribera del Duero DO',
+    anada: '2018',
+  },
+  {
+    slug: 'reserva',
+    nombre: 'Reserva',
+    bodega: 'Marqués de Riscal',
+    denominacionOrigen: 'Rioja DOCa',
+    anada: '2019',
+  },
 ];
 
 function setupDom() {

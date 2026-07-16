@@ -1,3 +1,7 @@
+/** @jsxImportSource preact */
+// Keystatic pulls in @astrojs/react, so the default JSX types resolve to React.
+// This island is Preact — pin its JSX types so `class`/Preact events type-check
+// (astro check). The @astrojs/preact integration already compiles it as Preact.
 import { useSignal, useComputed, useSignalEffect } from '@preact/signals';
 import { useEffect } from 'preact/hooks';
 import { facets, compose, type WineIndexEntry, type Field } from '../lib/search';

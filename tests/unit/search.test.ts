@@ -8,9 +8,27 @@ import {
 } from '../../src/lib/search';
 
 const entries: WineIndexEntry[] = [
-  { slug: 'unico', nombre: 'Único', bodega: 'Vega Sicilia', denominacionOrigen: 'Ribera del Duero DO', anada: '2018' },
-  { slug: 'reserva', nombre: 'Reserva', bodega: 'Marqués de Riscal', denominacionOrigen: 'Rioja DOCa', anada: '2019' },
-  { slug: 'tondonia', nombre: 'Tondonia', bodega: 'R. López de Heredia', denominacionOrigen: 'Rioja DOCa', anada: 'NV' },
+  {
+    slug: 'unico',
+    nombre: 'Único',
+    bodega: 'Vega Sicilia',
+    denominacionOrigen: 'Ribera del Duero DO',
+    anada: '2018',
+  },
+  {
+    slug: 'reserva',
+    nombre: 'Reserva',
+    bodega: 'Marqués de Riscal',
+    denominacionOrigen: 'Rioja DOCa',
+    anada: '2019',
+  },
+  {
+    slug: 'tondonia',
+    nombre: 'Tondonia',
+    bodega: 'R. López de Heredia',
+    denominacionOrigen: 'Rioja DOCa',
+    anada: 'NV',
+  },
 ];
 
 describe('matchedFields (FR-006 / FR-007)', () => {
@@ -22,7 +40,13 @@ describe('matchedFields (FR-006 / FR-007)', () => {
   });
 
   it('reports MULTIPLE matched fields for one term', () => {
-    const e: WineIndexEntry = { slug: 'x', nombre: 'de la Rosa', bodega: 'Bodega de Prueba', denominacionOrigen: 'DO de Prueba', anada: '2020' };
+    const e: WineIndexEntry = {
+      slug: 'x',
+      nombre: 'de la Rosa',
+      bodega: 'Bodega de Prueba',
+      denominacionOrigen: 'DO de Prueba',
+      anada: '2020',
+    };
     expect(matchedFields(e, 'de').sort()).toEqual(['bodega', 'denominacionOrigen', 'nombre']);
   });
 
