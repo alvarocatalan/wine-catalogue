@@ -47,6 +47,12 @@
 - Q: CMS ⇆ content-collection schema parity (CHK030)? → A: Both schemas MUST
   declare the same field set; divergence is a defect, enforced by the
   schema-parity test (T019) — documented as FR-026.
+- Q: Where are image format/size validated (T022 spike finding)? → A: **Not in
+  Keystatic** — `fields.image` only validates presence (isRequired), not
+  format/size. Format (JPEG/PNG/WebP) and size (≤10 MB) are enforced by a
+  **build gate** that scans `src/assets/vinos/` and fails the build with a clear
+  message (FR-014). Keystatic native validation covers only required fields and
+  the `anada` NV/YYYY pattern (FR-024).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -175,9 +181,10 @@ appears; confirm it can be recovered by reverting the commit.
   The published site MUST fall back to a clean placeholder image rather than a
   broken icon, and the administrator SHOULD be able to upload a replacement in
   the CMS.
-- What happens when the administrator tries to upload an oversized or
-  unsupported file? The CMS MUST refuse the upload with a clear message stating
-  the accepted formats and size limit.
+- What happens when an image is an unsupported format or exceeds 10 MB? The
+  **build gate** rejects it — the build fails with a clear message naming the
+  file and the reason — so it never reaches production. (The Keystatic panel
+  itself does not validate image format/size.)
 - What happens when two entries have identical vintage + winery + wine name?
   The catalogue MUST allow the duplicate (different bottlings or re-tastings are
   legitimate) but the CMS SHOULD surface a non-blocking warning.
@@ -241,9 +248,12 @@ appears; confirm it can be recovered by reverting the commit.
   drag-and-drop** — both MUST be available and neither is mandatory (the
   administrator uses whichever they prefer). The administrator is responsible for
   sourcing the image themselves (typically by downloading it from the internet
-  beforehand). The app MUST accept common image formats (JPEG, PNG, WebP) and
-  enforce a per-image size limit of 10 MB (rejecting larger files with a clear
-  message stating the accepted formats and size limit). The uploaded image MUST
+  beforehand). Accepted image formats are JPEG, PNG, and WebP with a per-image
+  size limit of 10 MB, **enforced by a build gate** — the Keystatic panel cannot
+  validate image format/size, so a pipeline check scans the committed images in
+  `src/assets/vinos/` and **fails the build** with a clear message (file + reason)
+  if any image is an unsupported format or exceeds the size limit, so no invalid
+  image can reach production. The uploaded image MUST
   be committed to the git repository as a versioned file and served as a static
   asset of the published site, so it is durable, versioned alongside the rest of
   the wine's data, visible to anyone viewing the published site, and independent
@@ -281,11 +291,12 @@ appears; confirm it can be recovered by reverting the commit.
   local development and MUST NOT be part of the published static site (it is
   excluded from the production build and deployment; see FR-020).
 - **FR-024**: The Keystatic admin panel MUST surface a validation error and MUST
-  NOT save a wine entry when a required field is missing or the uploaded image
-  violates the format/size constraints (see FR-002, FR-014), relying on
-  Keystatic's native field validation. No upload-progress indicators, retries,
-  or network-upload feedback are required — authoring is local, not a networked
-  upload.
+  NOT save a wine entry when a **required field is missing or the `anada` value
+  does not match the `NV`/`YYYY` pattern**, using Keystatic's native field
+  validation. Keystatic's native validation does **not** cover image format or
+  size — those are enforced by the FR-014 build gate. No upload-progress
+  indicators, retries, or network-upload feedback are required — authoring is
+  local, not a networked upload.
 - **FR-025**: When editing a wine, its existing image MUST be retained unless the
   administrator explicitly replaces it (native Keystatic behaviour; see FR-010).
 - **FR-026**: The Keystatic schema (`keystatic.config.ts`) and the
@@ -352,7 +363,7 @@ appears; confirm it can be recovered by reverting the commit.
   hosting on GitHub); no separate backup mechanism is specified for v1.
 - Accepted image formats are JPEG, PNG, and WebP, with a default per-image
   size limit of 10 MB. These defaults can be revisited but MUST remain
-  explicit so that upload validation is testable.
+  explicit so that the build-gate validation (FR-014) is testable.
 - All UI text is in English for v1. Additional locales are out of scope.
 - Offline behaviour: the published catalogue (pages and images) MUST be
   viewable and searchable offline via precache. Authoring requires connectivity
