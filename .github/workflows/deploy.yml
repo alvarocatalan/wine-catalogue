@@ -9,6 +9,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 # Least privilege + the tokens GitHub Pages deployment needs.
@@ -23,7 +24,34 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Dev-mode regression guard: drives `astro dev` (React/Keystatic + Preact both
+  # active) to prove the search island still hydrates — a failure the production
+  # preview never sees. Runs on every push/PR and gates the build/deploy below.
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7 # ⚠️ version unverified — adjust on first run if it fails to resolve
+
+      - name: Set up Node
+        uses: actions/setup-node@v4 # ⚠️ version unverified — adjust on first run if it fails to resolve
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright (Chromium)
+        run: npx playwright install --with-deps chromium
+
+      - name: Dev-mode e2e (island hydration under `astro dev`)
+        run: npm run test:e2e:dev
+
   build:
+    needs: test
+    # Only build/deploy off pushes to main (and manual dispatch) — never on PRs.
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -46,6 +74,7 @@ jobs:
 
   deploy:
     needs: build
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
