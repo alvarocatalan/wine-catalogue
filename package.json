@@ -8,8 +8,9 @@
     "prebuild": "node scripts/validate-images.mjs",
     "build": "SKIP_KEYSTATIC=true astro build",
     "build:cms": "astro build",
-    "preview": "astro preview",
+    "preview": "SKIP_KEYSTATIC=true astro preview",
     "test": "vitest run",
+    "test:e2e": "npm run build && playwright test",
     "validate:images": "node scripts/validate-images.mjs",
     "gen:fixture": "node scripts/gen-fixture.mjs"
   },
@@ -25,6 +26,8 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.61.1",
     "vitest": "^4.1.10"
   }
 }

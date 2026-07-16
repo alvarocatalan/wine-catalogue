@@ -1,0 +1,22 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import WineCard from './WineCard.astro';
+import EmptyState from './EmptyState.astro';
+
+interface Props {
+  wines: CollectionEntry<'vinos'>[];
+}
+const { wines } = Astro.props;
+---
+
+{
+  wines.length === 0 ? (
+    <EmptyState />
+  ) : (
+    <ul class="grid">
+      {wines.map((wine) => (
+        <WineCard wine={wine} />
+      ))}
+    </ul>
+  )
+}

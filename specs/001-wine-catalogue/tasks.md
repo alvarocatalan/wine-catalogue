@@ -37,7 +37,7 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 - [ ] T002 [P] Add Tailwind CSS 4 via `@tailwindcss/vite`; create `src/styles/global.css` with the design tokens (limited palette, spacing, one display + one body font) (FR-015).
 - [ ] T003 [P] Configure ESLint + Prettier and an `astro check` script; add all `npm` scripts (dev/build/preview/test/test:island/test:e2e/lint/perf) per quickstart.md.
 - [x] T004 [P] Configure Vitest in `vitest.config.ts` (node env for `src/lib`, jsdom for the island).
-- [ ] T005 [P] Configure Playwright + `axe-core` in `playwright.config.ts` (runs against the built static preview) and Lighthouse CI in `lighthouserc.json` with the budgets from research Decision 11.
+- [x] T005 [P] Configure Playwright + `axe-core` in `playwright.config.ts` (runs against the built static preview) and Lighthouse CI in `lighthouserc.json` with the budgets from research Decision 11.
 - [ ] T006 Add `@astrojs/markdoc` integration to `astro.config.mjs` (always on — renders `.mdoc` bodies).
 - [ ] T007 Wire the **dev-only** CMS stack in `astro.config.mjs`: conditionally include `@astrojs/react`, `@keystatic/astro`, and the `@astrojs/node` adapter **only when `SKIP_KEYSTATIC !== 'true'`** (Keystatic's official "disable admin UI in production" recipe), so a build with `SKIP_KEYSTATIC=true` mounts no `/keystatic` route and emits pure static output. Also set `site: 'https://alvarocatalan.github.io'` and `base: '/wine-catalog/'` (GitHub Pages project pages) (research Decision 2; FR-019, FR-020, FR-023, Constitution V).
 - [ ] T008 [P] Add `@vite-pwa/astro`: `public/manifest.webmanifest` + Workbox precache of the published shell/pages/images (view-only offline) (FR-012, research Decision 9).
@@ -51,14 +51,14 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T010 [P] Write failing unit test for the vintage validator in `tests/unit/vintage.test.ts` (`NV`, valid `YYYY`, invalid strings, future-year flag) (FR-003).
+- [x] T010 [P] Write failing unit test for the vintage validator in `tests/unit/vintage.test.ts` (`NV`, valid `YYYY`, invalid strings, future-year flag) (FR-003).
 - [ ] T011 [P] Write failing unit test for the Zod schema in `tests/unit/schema.test.ts` (required fields reject empty — including `foto` and `fotoAlt`; `anada` regex) (FR-002, FR-003, FR-021).
 - [ ] T012 Create the shared Zod schema in `src/lib/schema.ts`: `wineFrontmatter`, `VINTAGE` regex, and `WINE_FIELDS` (nombre, bodega, denominacionOrigen, anada, foto, fotoAlt, notas) — makes T011 pass (contracts/wine-schema.md).
-- [ ] T013 Implement the vintage validator in `src/lib/vintage.ts` (`NV`/`YYYY` + `anadaIsFuture`) — makes T010 pass.
+- [x] T013 Implement the vintage validator in `src/lib/vintage.ts` (`NV`/`YYYY` + `anadaIsFuture`) — makes T010 pass.
 - [ ] T014 Create the `vinos` Content Layer collection in `src/content.config.ts` (glob `**/*.mdoc` over `src/content/vinos`, schema `({ image }) => …` using `wineFrontmatter` + `foto: image()`) (data-model.md).
 - [ ] T015 Create `keystatic.config.ts` (local mode) mirroring the schema: seven fields, `slugField: 'nombre'`, `format: { contentField: 'notas' }`, `fields.image` with `directory: 'src/assets/vinos'` + `publicPath`, `isRequired` flags (contracts/wine-schema.md; FR-014, FR-018).
 - [ ] T016 Create content dirs `src/content/vinos/` and `src/assets/vinos/` (with `.gitkeep`) versioned in git (FR-012).
-- [ ] T017 Create `src/layouts/BaseLayout.astro` (head, tokens, service-worker registration) and `src/components/Placeholder.astro` + `public/placeholder.svg` (image-failure fallback) (FR-013, FR-015).
+- [x] T017 Create `src/layouts/BaseLayout.astro` (head, tokens, service-worker registration) and `src/components/Placeholder.astro` + `public/placeholder.svg` (image-failure fallback) (FR-013, FR-015).
 - [x] T018 **De-risk the image seam (research Decision 4)**: add one fixture wine (`.mdoc` + image), run `astro build`, and assert it produces an optimised `<img>` with a hashed `src` and the correct `alt`; fix `publicPath`/`directory` until the `image()` helper resolves.
 
 **Checkpoint**: Content pipeline proven end-to-end (author → validate → build → optimised image). User stories can begin.
@@ -97,17 +97,17 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 
 ### Tests for User Story 2 ⚠️ (write first, must fail)
 
-- [ ] T025 [P] [US2] Write failing e2e test `tests/e2e/browse.spec.ts` (Playwright): grid renders one card per fixture wine; card fields present (FR-004).
-- [ ] T026 [P] [US2] Write failing e2e test `tests/e2e/detail.spec.ts`: `/vinos/<slug>` shows large image, four fields, rendered notas; placeholder shown when image missing (FR-005, FR-013, FR-022).
-- [ ] T027 [P] [US2] Write failing e2e test `tests/e2e/empty-a11y.spec.ts`: empty catalogue shows the empty state; axe reports no WCAG 2.1 AA violations (FR-016, FR-021, Principle III).
+- [x] T025 [P] [US2] Write failing e2e test `tests/e2e/browse.spec.ts` (Playwright): grid renders one card per fixture wine; card fields present (FR-004).
+- [x] T026 [P] [US2] Write failing e2e test `tests/e2e/detail.spec.ts`: `/vinos/<slug>` shows large image, four fields, rendered notas; placeholder shown when image missing (FR-005, FR-013, FR-022).
+- [x] T027 [P] [US2] Write failing e2e test `tests/e2e/empty-a11y.spec.ts`: empty catalogue shows the empty state; axe reports no WCAG 2.1 AA violations (FR-016, FR-021, Principle III).
 
 ### Implementation for User Story 2
 
-- [ ] T028 [P] [US2] Create `src/components/WineCard.astro` (optimised `<Image/>` thumbnail or placeholder, nombre, bodega, anada; `data-*` for filtering; future-vintage marker via `vintage.ts`) (FR-004, FR-013).
-- [ ] T029 [P] [US2] Create `src/components/EmptyState.astro` (empty + no-results states) (FR-016).
-- [ ] T030 [US2] Create `src/components/WineGrid.astro` (queries the `vinos` collection, renders the card grid) (FR-004).
-- [ ] T031 [US2] Create `src/pages/index.astro` (BaseLayout + WineGrid + empty state) — makes T025/T027 pass (FR-004, FR-016).
-- [ ] T032 [US2] Create `src/pages/vinos/[slug].astro` with `getStaticPaths()` over `vinos`: full `<Image/>`, all fields, rendered `notas` — makes T026 pass (FR-005, FR-020, FR-022).
+- [x] T028 [P] [US2] Create `src/components/WineCard.astro` (optimised `<Image/>` thumbnail or placeholder, nombre, bodega, anada; `data-*` for filtering; future-vintage marker via `vintage.ts`) (FR-004, FR-013).
+- [x] T029 [P] [US2] Create `src/components/EmptyState.astro` (empty + no-results states) (FR-016).
+- [x] T030 [US2] Create `src/components/WineGrid.astro` (queries the `vinos` collection, renders the card grid) (FR-004).
+- [x] T031 [US2] Create `src/pages/index.astro` (BaseLayout + WineGrid + empty state) — makes T025/T027 pass (FR-004, FR-016).
+- [x] T032 [US2] Create `src/pages/vinos/[slug].astro` with `getStaticPaths()` over `vinos`: full `<Image/>`, all fields, rendered `notas` — makes T026 pass (FR-005, FR-020, FR-022).
 
 **Checkpoint**: The static catalogue is browsable end-to-end (grid + detail), independent of search.
 

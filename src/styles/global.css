@@ -1,0 +1,130 @@
+/* Minimalist design tokens + layout (FR-015). Plain CSS for now; the Tailwind
+   design-system task (T002) is deferred. High-contrast palette (WCAG 2.1 AA). */
+:root {
+  --bg: #fcfbf9;
+  --fg: #1b1b1b;
+  --muted: #565248;
+  --accent: #7a1f38;
+  --line: #e4e0d8;
+  --flag-fg: #6b4200;
+  --flag-bg: #fff4e0;
+  --radius: 10px;
+  --max: 1100px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+}
+
+a {
+  color: var(--accent);
+}
+
+.wrap {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+}
+
+.site-title {
+  font-size: 1.6rem;
+  letter-spacing: -0.01em;
+  margin: 0 0 1.5rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #fff;
+}
+
+.card a {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+  background: #f0ede7;
+}
+
+.card__body {
+  padding: 0.75rem 0.9rem 1rem;
+}
+
+.card__name {
+  font-weight: 600;
+  margin: 0 0 0.15rem;
+}
+
+.card__meta {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.flag {
+  display: inline-block;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--flag-fg);
+  background: var(--flag-bg);
+  border-radius: 4px;
+  padding: 0.05rem 0.4rem;
+}
+
+.empty {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--muted);
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.detail img {
+  max-width: 420px;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+}
+
+.detail dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.35rem 1rem;
+  margin: 1.25rem 0;
+}
+
+.detail dt {
+  color: var(--muted);
+}
+
+.detail dd {
+  margin: 0;
+}

@@ -1,0 +1,13 @@
+---
+// Empty catalogue state (FR-016). The "no search results" state is reused by the
+// search island (US3) with different copy.
+interface Props {
+  message?: string;
+}
+const { message = 'Aún no hay vinos en el catálogo.' } = Astro.props;
+---
+
+<div class="empty" role="status">
+  <p>{message}</p>
+  <p>El administrador puede añadir el primero en el panel de Keystatic.</p>
+</div>
