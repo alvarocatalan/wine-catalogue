@@ -79,18 +79,12 @@ describe('CatalogueSearch island (FR-006 / FR-009 / a11y)', () => {
     expect(document.querySelector('[aria-live="polite"]')).not.toBeNull();
   });
 
-  it('filtering by the Tipo facet narrows visible cards, and Clear resets it (FR-016)', () => {
+  it('the single field also filters by type as free text (FR-015)', () => {
     const root = setupDom();
     render(<CatalogueSearch entries={entries} />, { container: root });
-    const tipo = document.querySelector('select[aria-label="Tipo"]') as HTMLSelectElement;
-    expect(tipo).not.toBeNull();
-
-    fireEvent.change(tipo, { target: { value: 'blanco' } });
+    const input = document.querySelector('input[type="search"]') as HTMLInputElement;
+    fireEvent.input(input, { target: { value: 'blanco' } });
     expect(card('reserva').hidden).toBe(false); // reserva is blanco
     expect(card('unico').hidden).toBe(true); // unico is tinto
-
-    fireEvent.click(document.querySelector('button.clear') as HTMLButtonElement);
-    expect(card('unico').hidden).toBe(false);
-    expect(card('reserva').hidden).toBe(false);
   });
 });

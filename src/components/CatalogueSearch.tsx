@@ -4,7 +4,7 @@
 // (astro check). The @astrojs/preact integration already compiles it as Preact.
 import { useSignal, useComputed, useSignalEffect } from '@preact/signals';
 import { useEffect } from 'preact/hooks';
-import { facets, compose, type WineIndexEntry, type Field } from '../lib/search';
+import { compose, type WineIndexEntry, type Field } from '../lib/search';
 
 const FIELD_LABEL: Record<Field, string> = {
   nombre: 'nombre',
@@ -12,15 +12,6 @@ const FIELD_LABEL: Record<Field, string> = {
   denominacionOrigen: 'D.O.',
   anada: 'añada',
   tipo: 'tipo',
-};
-
-const TIPO_LABEL: Record<string, string> = {
-  tinto: 'Tinto',
-  blanco: 'Blanco',
-  rosado: 'Rosado',
-  espumoso: 'Espumoso',
-  dulce: 'Dulce',
-  generoso: 'Generoso',
 };
 
 interface Props {
@@ -40,30 +31,11 @@ export default function CatalogueSearch({ entries }: Props) {
   }, []);
 
   const query = useSignal('');
-  const fAnada = useSignal('');
-  const fDo = useSignal('');
-  const fBodega = useSignal('');
-  const fTipo = useSignal('');
-
-  const fc = useComputed(() => facets(data.value));
-  const visible = useComputed(() =>
-    compose(data.value, query.value, {
-      anada: fAnada.value || undefined,
-      denominacionOrigen: fDo.value || undefined,
-      bodega: fBodega.value || undefined,
-      tipo: fTipo.value || undefined,
-    }),
-  );
-  const active = useComputed(
-    () => !!(query.value || fAnada.value || fDo.value || fBodega.value || fTipo.value),
-  );
+  const visible = useComputed(() => compose(data.value, query.value));
+  const active = useComputed(() => query.value.trim().length > 0);
 
   const clear = () => {
     query.value = '';
-    fAnada.value = '';
-    fDo.value = '';
-    fBodega.value = '';
-    fTipo.value = '';
   };
 
   // Wire the server-rendered "Limpiar búsqueda" control inside #no-results.
@@ -109,56 +81,19 @@ export default function CatalogueSearch({ entries }: Props) {
 
   return (
     <div class="search" role="search">
+      <span class="search__icon" aria-hidden="true">
+        ⌕
+      </span>
       <input
         type="search"
         class="search__input"
-        aria-label="Buscar vinos"
+        aria-label="Buscar vinos por nombre, bodega, D.O., añada o tipo"
         placeholder="Buscar"
         value={query.value}
         onInput={(e) => (query.value = (e.currentTarget as HTMLInputElement).value)}
       />
-      <select
-        aria-label="Tipo"
-        value={fTipo.value}
-        onChange={(e) => (fTipo.value = (e.currentTarget as HTMLSelectElement).value)}
-      >
-        <option value="">Tipo (todos)</option>
-        {fc.value.tipo.map((v) => (
-          <option value={v}>{TIPO_LABEL[v] ?? v}</option>
-        ))}
-      </select>
-      <select
-        aria-label="Añada"
-        value={fAnada.value}
-        onChange={(e) => (fAnada.value = (e.currentTarget as HTMLSelectElement).value)}
-      >
-        <option value="">Añada (todas)</option>
-        {fc.value.anada.map((v) => (
-          <option value={v}>{v}</option>
-        ))}
-      </select>
-      <select
-        aria-label="Denominación de Origen"
-        value={fDo.value}
-        onChange={(e) => (fDo.value = (e.currentTarget as HTMLSelectElement).value)}
-      >
-        <option value="">D.O. (todas)</option>
-        {fc.value.denominacionOrigen.map((v) => (
-          <option value={v}>{v}</option>
-        ))}
-      </select>
-      <select
-        aria-label="Bodega"
-        value={fBodega.value}
-        onChange={(e) => (fBodega.value = (e.currentTarget as HTMLSelectElement).value)}
-      >
-        <option value="">Bodega (todas)</option>
-        {fc.value.bodega.map((v) => (
-          <option value={v}>{v}</option>
-        ))}
-      </select>
       {active.value && (
-        <button type="button" class="clear" onClick={clear}>
+        <button type="button" class="clear" onClick={clear} aria-label="Limpiar búsqueda">
           Limpiar
         </button>
       )}

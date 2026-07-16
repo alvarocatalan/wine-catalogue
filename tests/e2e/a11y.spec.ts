@@ -32,40 +32,43 @@ test('no-results (empty) state has no WCAG 2.1 AA violations', async ({ page }) 
   expect(results.violations).toEqual([]);
 });
 
-// T028: every search/facet control is labelled (server-rendered, so present pre-hydration).
-test('search and facet controls all have accessible names (FR-015/FR-016)', async ({ page }) => {
+// T028: the single search field is labelled (server-rendered, present pre-hydration).
+test('the search field has an accessible name (FR-015)', async ({ page }) => {
   await page.goto('./');
-  await expect(page.getByLabel('Buscar vinos')).toBeVisible();
-  await expect(page.getByLabel('Tipo')).toBeVisible();
-  await expect(page.getByLabel('Añada')).toBeVisible();
-  await expect(page.getByLabel('Denominación de Origen')).toBeVisible();
-  await expect(page.getByLabel('Bodega')).toBeVisible();
+  await expect(
+    page.getByLabel('Buscar vinos por nombre, bodega, D.O., añada o tipo'),
+  ).toBeVisible();
 });
 
-// T046: keyboard focus reaches the controls AND shows a visible ring (WCAG 2.4.7).
-test('keyboard focus is reachable and visibly ringed', async ({ page }) => {
+// T028/T046: keyboard focus reaches the controls AND shows a visible indicator
+// (WCAG 2.4.7). The search field indicates focus by brightening its underline
+// (no box outline, per the design); other controls use the global focus ring.
+test('keyboard focus is reachable and visibly indicated', async ({ page }) => {
   await page.goto('./');
+
+  // The unfocused search underline colour.
+  const before = await page
+    .locator('.search')
+    .evaluate((el) => getComputedStyle(el).borderBottomColor);
+
   await page.keyboard.press('Tab'); // first focusable is the search input
-  const firstRinged = await page.evaluate(() => {
-    const el = document.activeElement;
-    if (!el || el === document.body) return { ok: false, tag: null };
-    const cs = getComputedStyle(el);
+  const focus = await page.evaluate(() => {
+    const el = document.activeElement as HTMLElement | null;
+    const search = el?.closest('.search') as HTMLElement | null;
     return {
-      ok:
-        el.matches(':focus-visible') &&
-        cs.outlineStyle !== 'none' &&
-        parseFloat(cs.outlineWidth) > 0,
-      tag: el.tagName.toLowerCase(),
-      type: (el as HTMLInputElement).type ?? null,
+      isSearchInput: !!el && el.matches('input[type="search"]'),
+      underline: search ? getComputedStyle(search).borderBottomColor : null,
     };
   });
-  expect(firstRinged.ok, `focused <${firstRinged.tag}> lacks a visible ring`).toBe(true);
+  expect(focus.isSearchInput).toBe(true);
+  // Focus brightens the underline → a visible focus indicator without a box.
+  expect(focus.underline).not.toBe(before);
 
-  // Tabbing continues to reach interactive controls (selects/links/buttons).
+  // Tabbing continues to reach interactive controls, which carry the global ring.
   const reached = new Set<string>();
   for (let i = 0; i < 6; i++) {
     await page.keyboard.press('Tab');
     reached.add(await page.evaluate(() => document.activeElement?.tagName.toLowerCase() ?? ''));
   }
-  expect([...reached].some((t) => ['select', 'a', 'button', 'input'].includes(t))).toBe(true);
+  expect([...reached].some((t) => ['a', 'button', 'input'].includes(t))).toBe(true);
 });

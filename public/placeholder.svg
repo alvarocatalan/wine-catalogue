@@ -1,7 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Imagen no disponible">
-  <rect width="400" height="400" fill="#f0ede7"/>
-  <g fill="none" stroke="#b8b0a2" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M175 70h50v70c0 15 25 30 25 70v110c0 12-10 20-22 20h-56c-12 0-22-8-22-20V210c0-40 25-55 25-70z"/>
-    <line x1="175" y1="70" x2="225" y2="70"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 74 182" role="img" aria-label="Imagen de botella no disponible">
+  <!-- Placeholder bottle matching the design handoff: warm neutral striped
+       silhouette on a transparent background (the card/detail panel gradient
+       shows through), replacing the previous grey outline. -->
+  <defs>
+    <pattern id="neck" width="10" height="10" patternUnits="userSpaceOnUse">
+      <rect width="10" height="5" fill="#d8d3c8" />
+      <rect y="5" width="10" height="5" fill="#e2ded4" />
+    </pattern>
+    <pattern id="body" width="12" height="12" patternUnits="userSpaceOnUse">
+      <rect width="12" height="6" fill="#d5d0c4" />
+      <rect y="6" width="12" height="6" fill="#e0dbcf" />
+    </pattern>
+  </defs>
+  <rect x="29" y="8" width="16" height="40" rx="5" fill="url(#neck)" />
+  <rect x="10" y="44" width="54" height="130" rx="9" fill="url(#body)" />
 </svg>

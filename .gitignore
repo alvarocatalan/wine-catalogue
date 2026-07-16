@@ -20,3 +20,6 @@ playwright-report/
 
 # lighthouse ci reports
 .lighthouseci/
+
+# Design handoff — reference only, removed once the redesign shipped
+design/

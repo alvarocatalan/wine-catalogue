@@ -4,13 +4,18 @@ shell commands, and other important information, read the current plan:
 `specs/002-wine-redesign-tipo/plan.md`
 
 Active feature: **Visual Redesign + Wine Type Field** (`002-wine-redesign-tipo`) —
-applies the redesign in `design/redesign-2026/` and adds a single new **required
-enum** content field **`tipo`** (`tinto` | `blanco` | `rosado` | `espumoso` |
-`dulce` | `generoso`), canonical in `src/lib/schema.ts` (`TIPOS`/`TipoValue`),
-mirrored in `keystatic.config.ts`, added to the build-time search index as a filter
-facet, and shown as a colour-coded label (`--tipo-*`) on the card and detail page;
-missing `tipo` **fails the build** (no silent default). Design tokens from
-`design-tokens.css` are merged into `global.css`; Playfair Display is **self-hosted**.
+applied the redesign (design handoff since removed from the repo) and added a single
+new **required enum** content field **`tipo`** (`tinto` | `blanco` | `rosado` |
+`espumoso` | `dulce` | `generoso`), canonical in `src/lib/tipos.ts` (`TIPOS`/`TipoValue`,
+re-exported by `src/lib/schema.ts` to keep Zod out of the search-island bundle),
+mirrored in `keystatic.config.ts`, included in the build-time search index, and shown
+as a colour-coded label (`--tipo-*` dot + AA `--tipo-*-text`) on the card and detail
+page; missing `tipo` **fails the build** (no silent default). Search is a **single
+free-text field** over all fields (name, bodega, D.O., añada, tipo) — **no facet
+dropdowns** (the earlier añada/D.O./bodega facets were removed to match the design).
+Design tokens are merged into `global.css`; **Playfair Display is self-hosted**
+(WOFF2 subsets in `src/assets/fonts/`, Vite-bundled so preload/@font-face resolve
+under the `/wine-catalogue/` base).
 Previous feature: **Wine Catalogue** (`001-wine-catalogue`). Stack: **Astro 5.x**
 (`output: 'static'`) + **plain CSS with custom-property tokens** (`src/styles/global.css`)
 + TypeScript strict. (**Tailwind was evaluated and discarded for v1**: small UI

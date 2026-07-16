@@ -17,7 +17,11 @@ if (!SKIP_KEYSTATIC) {
     import('@keystatic/astro'),
     import('@astrojs/node'),
   ]);
-  integrations.push(react(), keystatic());
+  // React powers only Keystatic's admin UI. It MUST NOT touch our Preact island
+  // (src/components) — otherwise its dev-only Fast Refresh preamble is injected
+  // into the .tsx island and collides ("prevRefreshReg has already been declared"),
+  // breaking hydration in `astro dev`. Mirror preact's include as react's exclude.
+  integrations.push(react({ exclude: ['**/components/**'] }), keystatic());
   adapter = node({ mode: 'standalone' });
 }
 

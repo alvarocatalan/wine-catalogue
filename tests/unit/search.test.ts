@@ -1,11 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  matchedFields,
-  facets,
-  passesFilters,
-  compose,
-  type WineIndexEntry,
-} from '../../src/lib/search';
+import { matchedFields, compose, type WineIndexEntry } from '../../src/lib/search';
 
 const entries: WineIndexEntry[] = [
   {
@@ -34,8 +28,8 @@ const entries: WineIndexEntry[] = [
   },
 ];
 
-describe('matchedFields (FR-006 / FR-007)', () => {
-  it('matches case-insensitively and partially across the four text fields', () => {
+describe('matchedFields (FR-015)', () => {
+  it('matches case-insensitively and partially across the five fields', () => {
     expect(matchedFields(entries[0], 'ÚNIC')).toEqual(['nombre']);
     expect(matchedFields(entries[1], 'riscal')).toEqual(['bodega']);
     expect(matchedFields(entries[1], 'rioja')).toEqual(['denominacionOrigen']);
@@ -65,51 +59,25 @@ describe('matchedFields (FR-006 / FR-007)', () => {
   });
 });
 
-describe('facets', () => {
-  it('returns distinct, sorted values per facet field', () => {
-    const f = facets(entries);
-    expect(f.anada).toEqual(['2018', '2019', 'NV']);
-    expect(f.denominacionOrigen).toEqual(['Ribera del Duero DO', 'Rioja DOCa']);
-    expect(f.bodega).toHaveLength(3);
+describe('compose — single-field free-text search (FR-015 / FR-017)', () => {
+  it('filtering by a type term keeps only wines of that type', () => {
+    // "tinto" matches only unico via its `tipo` field
+    expect([...compose(entries, 'tinto').keys()]).toEqual(['unico']);
+    expect([...compose(entries, 'blanco').keys()]).toEqual(['reserva']);
   });
 
-  it('lists present tipos in canonical order, not alphabetical (FR-016)', () => {
-    // present: tinto, blanco, rosado → canonical order preserved
-    expect(facets(entries).tipo).toEqual(['tinto', 'blanco', 'rosado']);
-    // only the tipos actually present are listed
-    expect(facets([entries[1]]).tipo).toEqual(['blanco']);
-  });
-});
-
-describe('passesFilters + compose (FR-008 / FR-009)', () => {
-  it('passesFilters narrows by exact facet value', () => {
-    expect(passesFilters(entries[1], { denominacionOrigen: 'Rioja DOCa' })).toBe(true);
-    expect(passesFilters(entries[0], { denominacionOrigen: 'Rioja DOCa' })).toBe(false);
+  it('a text term matches across any field (e.g. D.O.)', () => {
+    // "rioja" matches reserva + tondonia by D.O.
+    expect([...compose(entries, 'rioja').keys()].sort()).toEqual(['reserva', 'tondonia']);
   });
 
-  it('passesFilters exact-matches the tipo facet (FR-016)', () => {
-    expect(passesFilters(entries[0], { tipo: 'tinto' })).toBe(true);
-    expect(passesFilters(entries[1], { tipo: 'tinto' })).toBe(false);
-  });
-
-  it('tipo facet combines with the text query (compose)', () => {
-    // query "rioja" matches reserva + tondonia by D.O.; tipo=blanco keeps only reserva
-    const res = compose(entries, 'rioja', { tipo: 'blanco' });
-    expect([...res.keys()]).toEqual(['reserva']);
-  });
-
-  it('compose = filterSet ∩ searchResults', () => {
-    const res = compose(entries, 'reserva', { denominacionOrigen: 'Rioja DOCa' });
-    expect([...res.keys()]).toEqual(['reserva']);
-  });
-
-  it('no query and no filter → all entries with empty matched fields', () => {
-    const res = compose(entries, '', {});
+  it('no query → all entries with empty matched fields', () => {
+    const res = compose(entries, '');
     expect(res.size).toBe(3);
     expect(res.get('unico')).toEqual([]);
   });
 
   it('no match → empty set (drives the no-results state)', () => {
-    expect(compose(entries, 'zzz', {}).size).toBe(0);
+    expect(compose(entries, 'zzz').size).toBe(0);
   });
 });

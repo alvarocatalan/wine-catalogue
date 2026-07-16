@@ -1,12 +1,18 @@
-# Contract: Build-time Search Index & `tipo` Facet
+# Contract: Build-time Search Index & Single-field Search
 
 **Applies to**: `src/lib/search.ts`, `src/pages/index.astro` (index projection),
 `src/components/CatalogueSearch.tsx`.
 
+> **Scope decision (post-implementation)**: to match the design handoff, the catalogue
+> uses a **single free-text search field with no facet dropdowns**. The earlier
+> añada / D.O. / bodega facet selects (from feature 001) were removed, and the `tipo`
+> filter from FR-016 is satisfied by the single field searching the `tipo` field as
+> free text (typing "tinto" filters to red wines). There is no discrete facet control.
+
 ## Index entry shape (`WineIndexEntry`)
 
-Embedded as JSON in `#wine-search-index` at build (no network, no storage). This feature adds
-`tipo`:
+Embedded as JSON in `#wine-search-index` at build (no network, no storage). Includes
+`tipo` so the single field can match on it:
 
 ```ts
 interface WineIndexEntry {
@@ -15,7 +21,7 @@ interface WineIndexEntry {
   bodega: string;
   denominacionOrigen: string;
   anada: string;
-  tipo: TipoValue;   // ← new, required
+  tipo: TipoValue; // searchable as free text
 }
 ```
 
@@ -23,36 +29,30 @@ interface WineIndexEntry {
 
 ## Free-text search
 
-`tipo` is added to the text `FIELDS` list, so a query like "tinto" matches on the type. Matching
-stays case-insensitive and partial (`matchedFields`). The matched-field badge may report "tipo".
-
-## Type facet
-
-- `Filters` gains `tipo?: TipoValue`.
-- `passesFilters` adds an exact-match branch: `(!filters.tipo || entry.tipo === filters.tipo)`.
-- `facets(entries)` returns a `tipo` array of the distinct types present (ordered by `TIPOS`
-  canonical order, not alphabetical, so the control reads tinto→generoso).
-- `compose()` semantics unchanged: displayed = filters ∩ text-results.
+A single query matches (case-insensitive, partial) across ALL fields —
+`nombre`, `bodega`, `denominacionOrigen`, `anada`, `tipo` — via `matchedFields` /
+`FIELDS` in `search.ts`. `compose(entries, query)` returns the visible slug → matched
+fields; an empty query shows every wine; no match yields an empty set (no-results).
 
 ## Island UI (`CatalogueSearch.tsx`)
 
-- Add one `<select>` labelled **"Tipo"** with an empty "Tipo (todos)" option + one option per
-  present type (label = capitalised).
-- The type facet combines with the single text input and the existing añada / D.O. / bodega
-  facets; the "clear" control resets it; the live count and `#no-results` state reflect it.
-- Cards expose `data-tipo` so the imperative show/hide keeps operating on server-rendered cards
-  (no card re-render → `<Image/>` output preserved).
-- Keyboard operable with an accessible label (Principle III); island stays < 20 KB gz.
+- A single `<input type="search">` labelled for all searchable fields, plus a "Limpiar"
+  control that appears while a query is active, and an sr-only `aria-live` status.
+- No `<select>` facets.
+- Imperatively shows/hides the server-rendered cards by `data-slug` (no card
+  re-render → `<Image/>` output preserved), updates the `#wine-count` header, and
+  toggles `#no-results` with the highlighted term.
+- Keyboard operable with an accessible label; island stays < 20 KB gz.
 
 ## Invariants
 
-- No browser storage; no network at view time. Index is embedded, filtering is in-memory.
-- Initial grid is server-rendered HTML and usable without the island (island only refines it).
+- No browser storage; no network at view time. Index embedded, filtering in-memory.
+- Initial grid is server-rendered HTML and usable without the island.
 
 ## Test obligations
 
 | Test | Assertion |
 |------|-----------|
-| `search.test.ts` (unit) | `tipo` matched by `matchedFields`; `passesFilters` exact-matches `tipo`; `facets().tipo` lists present types |
-| `catalogue-search.test.tsx` (component) | selecting a type narrows visible entries; clear resets |
-| `search-filter.spec.ts` (e2e) | filtering by the Tipo facet narrows the grid over the built site |
+| `search.test.ts` (unit) | `matchedFields` matches every field incl. `tipo`; `compose` returns matches / empty on no match |
+| `catalogue-search.test.tsx` (component) | typing filters visible cards (incl. by type as text); clear resets; aria-live present |
+| `search-filter.spec.ts` (e2e) | single field filters by text, by type ("tinto"), and by D.O.; no-results + clear over the built site |
