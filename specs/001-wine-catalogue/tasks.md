@@ -79,11 +79,11 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 ### Implementation for User Story 1
 
 - [x] T021 [US1] Finalise the Keystatic `vinos` collection fields, labels, and validation (required fields, `anada` pattern surfaced where supported) in `keystatic.config.ts` — makes T019 pass (FR-001, FR-002, FR-003).
-- [ ] T022 [US1] Confirm the Keystatic image upload contract in `keystatic.config.ts` `fields.image`: `isRequired`, file-picker **and** drag-and-drop both available, image co-located per slug (verified). NOTE (spike): Keystatic does **not** validate image format/size — that is the FR-014 build gate (T055/T056), not the panel (FR-014, FR-024).
-- [ ] T023 [US1] Add `createdAt` (`fields.date`, default today) and ensure `notas` is the optional Markdoc body (FR-022).
-- [ ] T024 [US1] Add a committed fixture wine under `src/content/vinos/` + image (used by T018/T020 and later browse tests) — makes T020 pass.
-- [ ] T055 [US1] Write failing test `tests/unit/image-gate.test.ts` for the image build gate: a valid JPEG/PNG/WebP ≤ 10 MB passes; an unsupported format fails; a file > 10 MB fails; the failure message names the file + reason (FR-014).
-- [ ] T056 [US1] Implement the image build gate `scripts/validate-images.mjs` (scan `src/assets/vinos/**`; fail with a clear message naming file + reason on unsupported format or > 10 MB) and wire it into the build (`prebuild`/`build` script) so it also runs in CI via `withastro/action` (T051) — makes T055 pass; enforces FR-014 so no invalid image reaches production.
+- [x] T022 [US1] Confirm the Keystatic image upload contract in `keystatic.config.ts` `fields.image`: `isRequired`, file-picker **and** drag-and-drop both available, image co-located per slug (verified). NOTE (spike): Keystatic does **not** validate image format/size — that is the FR-014 build gate (T055/T056), not the panel (FR-014, FR-024).
+- [x] T023 [US1] Add `createdAt` (`fields.date`, default today) and ensure `notas` is the optional Markdoc body (FR-022).
+- [x] T024 [US1] Add a committed fixture wine under `src/content/vinos/` + image (used by T018/T020 and later browse tests) — makes T020 pass.
+- [x] T055 [US1] Write failing test `tests/unit/image-gate.test.ts` for the image build gate: a valid JPEG/PNG/WebP ≤ 10 MB passes; an unsupported format fails; a file > 10 MB fails; the failure message names the file + reason (FR-014).
+- [x] T056 [US1] Implement the image build gate `scripts/validate-images.mjs` (scan `src/assets/vinos/**`; fail with a clear message naming file + reason on unsupported format or > 10 MB) and wire it into the build (`prebuild`/`build` script) so it also runs in CI via `withastro/action` (T051) — makes T055 pass; enforces FR-014 so no invalid image reaches production.
 
 **Checkpoint**: A wine can be authored, validated, and committed; the build gate blocks any invalid image; MVP authoring works.
 

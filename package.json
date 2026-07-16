@@ -5,9 +5,12 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "astro dev",
+    "prebuild": "node scripts/validate-images.mjs",
     "build": "SKIP_KEYSTATIC=true astro build",
     "build:cms": "astro build",
     "preview": "astro preview",
+    "test": "vitest run",
+    "validate:images": "node scripts/validate-images.mjs",
     "gen:fixture": "node scripts/gen-fixture.mjs"
   },
   "dependencies": {
