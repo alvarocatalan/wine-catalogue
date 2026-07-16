@@ -36,7 +36,7 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 - [ ] T001 Initialise Astro 5 project at repo root: `package.json`, `astro.config.mjs` with default `output: 'static'`, `tsconfig.json` (`strict`), and `src/` tree per plan.md.
 - [ ] T002 [P] Add Tailwind CSS 4 via `@tailwindcss/vite`; create `src/styles/global.css` with the design tokens (limited palette, spacing, one display + one body font) (FR-015).
 - [ ] T003 [P] Configure ESLint + Prettier and an `astro check` script; add all `npm` scripts (dev/build/preview/test/test:island/test:e2e/lint/perf) per quickstart.md.
-- [ ] T004 [P] Configure Vitest in `vitest.config.ts` (node env for `src/lib`, jsdom for the island).
+- [x] T004 [P] Configure Vitest in `vitest.config.ts` (node env for `src/lib`, jsdom for the island).
 - [ ] T005 [P] Configure Playwright + `axe-core` in `playwright.config.ts` (runs against the built static preview) and Lighthouse CI in `lighthouserc.json` with the budgets from research Decision 11.
 - [ ] T006 Add `@astrojs/markdoc` integration to `astro.config.mjs` (always on — renders `.mdoc` bodies).
 - [ ] T007 Wire the **dev-only** CMS stack in `astro.config.mjs`: conditionally include `@astrojs/react`, `@keystatic/astro`, and the `@astrojs/node` adapter **only when `SKIP_KEYSTATIC !== 'true'`** (Keystatic's official "disable admin UI in production" recipe), so a build with `SKIP_KEYSTATIC=true` mounts no `/keystatic` route and emits pure static output. Also set `site: 'https://alvarocatalan.github.io'` and `base: '/wine-catalog/'` (GitHub Pages project pages) (research Decision 2; FR-020, FR-023, Constitution V).
@@ -59,7 +59,7 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 - [ ] T015 Create `keystatic.config.ts` (local mode) mirroring the schema: seven fields, `slugField: 'nombre'`, `format: { contentField: 'notas' }`, `fields.image` with `directory: 'src/assets/vinos'` + `publicPath`, `isRequired` flags (contracts/wine-schema.md; FR-014, FR-018).
 - [ ] T016 Create content dirs `src/content/vinos/` and `src/assets/vinos/` (with `.gitkeep`) versioned in git (FR-012).
 - [ ] T017 Create `src/layouts/BaseLayout.astro` (head, tokens, service-worker registration) and `src/components/Placeholder.astro` + `public/placeholder.svg` (image-failure fallback) (FR-013, FR-015).
-- [ ] T018 **De-risk the image seam (research Decision 4)**: add one fixture wine (`.mdoc` + image), run `astro build`, and assert it produces an optimised `<img>` with a hashed `src` and the correct `alt`; fix `publicPath`/`directory` until the `image()` helper resolves.
+- [x] T018 **De-risk the image seam (research Decision 4)**: add one fixture wine (`.mdoc` + image), run `astro build`, and assert it produces an optimised `<img>` with a hashed `src` and the correct `alt`; fix `publicPath`/`directory` until the `image()` helper resolves.
 
 **Checkpoint**: Content pipeline proven end-to-end (author → validate → build → optimised image). User stories can begin.
 
@@ -73,12 +73,12 @@ Single Astro project at repository root: `src/`, `tests/`, config files at root.
 
 ### Tests for User Story 1 ⚠️ (write first, must fail)
 
-- [ ] T019 [P] [US1] Write failing schema-parity test in `tests/unit/schema-parity.test.ts` asserting the Keystatic `vinos` field set equals `WINE_FIELDS` (contracts/wine-schema.md).
-- [ ] T020 [P] [US1] Write failing content-validation test in `tests/unit/content-validate.test.ts` that a valid fixture `.mdoc` passes the collection schema and an invalid one (missing `bodega`, bad `anada`) fails (FR-001, FR-002, FR-003).
+- [x] T019 [P] [US1] Write failing schema-parity test in `tests/unit/schema-parity.test.ts` asserting the Keystatic `vinos` field set equals `WINE_FIELDS` (contracts/wine-schema.md).
+- [x] T020 [P] [US1] Write failing content-validation test in `tests/unit/content-validate.test.ts` that a valid fixture `.mdoc` passes the collection schema and an invalid one (missing `bodega`, bad `anada`) fails (FR-001, FR-002, FR-003).
 
 ### Implementation for User Story 1
 
-- [ ] T021 [US1] Finalise the Keystatic `vinos` collection fields, labels, and validation (required fields, `anada` pattern surfaced where supported) in `keystatic.config.ts` — makes T019 pass (FR-001, FR-002, FR-003).
+- [x] T021 [US1] Finalise the Keystatic `vinos` collection fields, labels, and validation (required fields, `anada` pattern surfaced where supported) in `keystatic.config.ts` — makes T019 pass (FR-001, FR-002, FR-003).
 - [ ] T022 [US1] Confirm the image upload contract in `keystatic.config.ts` `fields.image`: JPEG/PNG/WebP only, ≤ 10 MB, file-picker **and** drag-and-drop both available, image named from the wine slug (FR-014; Clarifications 2026-07-15).
 - [ ] T023 [US1] Add `createdAt` (`fields.date`, default today) and ensure `notas` is the optional Markdoc body (FR-022).
 - [ ] T024 [US1] Add a committed fixture wine under `src/content/vinos/` + image (used by T018/T020 and later browse tests) — makes T020 pass.

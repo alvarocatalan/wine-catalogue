@@ -15,7 +15,10 @@ export const wineFrontmatter = {
   createdAt: z.coerce.date(),
 };
 
-// Canonical field set — the schema-parity test (T019) compares this to keystatic.config.ts.
+// Canonical schema field set — the schema-parity test (T019/FR-026) compares this
+// to keystatic.config.ts. The first seven are the FROZEN v1 content fields
+// (Decision 14); `createdAt` is the system creation timestamp (Key Entities),
+// present in both schemas. No id/UUID, no composite slug.
 export const WINE_FIELDS = [
   'nombre',
   'bodega',
@@ -24,4 +27,5 @@ export const WINE_FIELDS = [
   'foto',
   'fotoAlt',
   'notas',
+  'createdAt',
 ] as const;

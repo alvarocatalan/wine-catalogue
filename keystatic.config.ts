@@ -18,7 +18,16 @@ export default config({
           label: 'Denominación de Origen',
           validation: { isRequired: true },
         }),
-        anada: fields.text({ label: 'Añada', validation: { isRequired: true } }),
+        anada: fields.text({
+          label: 'Añada',
+          validation: {
+            isRequired: true,
+            pattern: {
+              regex: /^(NV|\d{4})$/,
+              message: 'La añada debe ser "NV" o un año de 4 cifras (p. ej. 2018)',
+            },
+          },
+        }),
         foto: fields.image({
           label: 'Foto',
           // Co-located, versioned; publicPath yields a path the content-collection
