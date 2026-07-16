@@ -32,10 +32,11 @@ test('no-results (empty) state has no WCAG 2.1 AA violations', async ({ page }) 
   expect(results.violations).toEqual([]);
 });
 
-// T046: every search/facet control is labelled (server-rendered, so present pre-hydration).
-test('search and facet controls all have accessible names (FR-006/008)', async ({ page }) => {
+// T028: every search/facet control is labelled (server-rendered, so present pre-hydration).
+test('search and facet controls all have accessible names (FR-015/FR-016)', async ({ page }) => {
   await page.goto('./');
   await expect(page.getByLabel('Buscar vinos')).toBeVisible();
+  await expect(page.getByLabel('Tipo')).toBeVisible();
   await expect(page.getByLabel('Añada')).toBeVisible();
   await expect(page.getByLabel('Denominación de Origen')).toBeVisible();
   await expect(page.getByLabel('Bodega')).toBeVisible();

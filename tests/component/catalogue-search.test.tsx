@@ -13,6 +13,7 @@ const entries: WineIndexEntry[] = [
     bodega: 'Vega Sicilia',
     denominacionOrigen: 'Ribera del Duero DO',
     anada: '2018',
+    tipo: 'tinto',
   },
   {
     slug: 'reserva',
@@ -20,6 +21,7 @@ const entries: WineIndexEntry[] = [
     bodega: 'Marqués de Riscal',
     denominacionOrigen: 'Rioja DOCa',
     anada: '2019',
+    tipo: 'blanco',
   },
 ];
 
@@ -75,5 +77,20 @@ describe('CatalogueSearch island (FR-006 / FR-009 / a11y)', () => {
     const root = setupDom();
     render(<CatalogueSearch entries={entries} />, { container: root });
     expect(document.querySelector('[aria-live="polite"]')).not.toBeNull();
+  });
+
+  it('filtering by the Tipo facet narrows visible cards, and Clear resets it (FR-016)', () => {
+    const root = setupDom();
+    render(<CatalogueSearch entries={entries} />, { container: root });
+    const tipo = document.querySelector('select[aria-label="Tipo"]') as HTMLSelectElement;
+    expect(tipo).not.toBeNull();
+
+    fireEvent.change(tipo, { target: { value: 'blanco' } });
+    expect(card('reserva').hidden).toBe(false); // reserva is blanco
+    expect(card('unico').hidden).toBe(true); // unico is tinto
+
+    fireEvent.click(document.querySelector('button.clear') as HTMLButtonElement);
+    expect(card('unico').hidden).toBe(false);
+    expect(card('reserva').hidden).toBe(false);
   });
 });

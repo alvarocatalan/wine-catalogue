@@ -17,6 +17,8 @@ export default tseslint.config(
       'playwright-report/',
       'test-results/',
       'src/env.d.ts',
+      // Vendored design-handoff prototype (reference only, not our source).
+      'design/',
     ],
   },
   js.configs.recommended,

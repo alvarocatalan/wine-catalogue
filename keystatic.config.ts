@@ -28,6 +28,20 @@ export default config({
             },
           },
         }),
+        // Mirrors the Zod `tipo` enum (schema-parity test). `defaultValue` is a form
+        // convenience only — it never patches existing .mdoc entries at build time.
+        tipo: fields.select({
+          label: 'Tipo',
+          options: [
+            { label: 'Tinto', value: 'tinto' },
+            { label: 'Blanco', value: 'blanco' },
+            { label: 'Rosado', value: 'rosado' },
+            { label: 'Espumoso', value: 'espumoso' },
+            { label: 'Dulce', value: 'dulce' },
+            { label: 'Generoso', value: 'generoso' },
+          ],
+          defaultValue: 'tinto',
+        }),
         foto: fields.image({
           label: 'Foto',
           // Co-located, versioned; publicPath yields a path the content-collection

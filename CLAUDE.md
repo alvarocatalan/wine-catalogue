@@ -1,9 +1,17 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
-`specs/001-wine-catalogue/plan.md`
+`specs/002-wine-redesign-tipo/plan.md`
 
-Active feature: **Wine Catalogue** (`001-wine-catalogue`). Stack: **Astro 5.x**
+Active feature: **Visual Redesign + Wine Type Field** (`002-wine-redesign-tipo`) —
+applies the redesign in `design/redesign-2026/` and adds a single new **required
+enum** content field **`tipo`** (`tinto` | `blanco` | `rosado` | `espumoso` |
+`dulce` | `generoso`), canonical in `src/lib/schema.ts` (`TIPOS`/`TipoValue`),
+mirrored in `keystatic.config.ts`, added to the build-time search index as a filter
+facet, and shown as a colour-coded label (`--tipo-*`) on the card and detail page;
+missing `tipo` **fails the build** (no silent default). Design tokens from
+`design-tokens.css` are merged into `global.css`; Playfair Display is **self-hosted**.
+Previous feature: **Wine Catalogue** (`001-wine-catalogue`). Stack: **Astro 5.x**
 (`output: 'static'`) + **plain CSS with custom-property tokens** (`src/styles/global.css`)
 + TypeScript strict. (**Tailwind was evaluated and discarded for v1**: small UI
 surface, plain CSS already meets FR-015 + WCAG AA, integration cost not justified.)
@@ -18,7 +26,8 @@ Images are processed at build via the Content Collections `image()` helper +
 `<Image />` (`astro:assets`). A single **Zod** schema (`src/lib/schema.ts`) drives
 the `vinos` collection and is mirrored by `keystatic.config.ts` (enforced by a
 schema-parity test). Fields: `nombre`, `bodega`, `denominacionOrigen`, `anada`
-(`NV`/`YYYY`), `foto`, `fotoAlt`, `notas`. Search/filter run **in-memory** in a
+(`NV`/`YYYY`), `tipo` (enum, feature 002), `foto`, `fotoAlt`, `notas`. Search/filter
+run **in-memory** in a
 small **Preact** island over a build-time text index (no storage). **Offline
 viewing is out of scope for v1** (no service worker / PWA / precache).
 **Prohibited**: IndexedDB / localStorage / sessionStorage. Astro note:

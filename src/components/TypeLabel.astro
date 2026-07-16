@@ -1,0 +1,25 @@
+---
+import type { TipoValue } from '../lib/schema';
+
+// Colour-coded type chip: coloured dot + uppercase text label, both in the type
+// colour (contracts/type-taxonomy.md). Colour is reinforcement only — the text
+// label always carries the meaning (WCAG 1.4.1). Two sizes: card vs detail.
+interface Props {
+  tipo: TipoValue;
+  variant?: 'card' | 'detail';
+}
+const { tipo, variant = 'card' } = Astro.props;
+
+// The chip reads two custom properties: `--chip` (on-brand dot colour) and
+// `--chip-text` (AA-compliant label text colour). Both derive from `tipo`.
+const dot = `var(--tipo-${tipo})`;
+const text = `var(--tipo-${tipo}-text)`;
+---
+
+<span
+  class:list={['type-label', `type-label--${variant}`]}
+  style={`--chip:${dot};--chip-text:${text}`}
+>
+  <span class="type-label__dot" aria-hidden="true"></span>
+  <span class="type-label__text">{tipo}</span>
+</span>

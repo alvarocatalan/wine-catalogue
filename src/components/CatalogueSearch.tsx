@@ -11,6 +11,16 @@ const FIELD_LABEL: Record<Field, string> = {
   bodega: 'bodega',
   denominacionOrigen: 'D.O.',
   anada: 'añada',
+  tipo: 'tipo',
+};
+
+const TIPO_LABEL: Record<string, string> = {
+  tinto: 'Tinto',
+  blanco: 'Blanco',
+  rosado: 'Rosado',
+  espumoso: 'Espumoso',
+  dulce: 'Dulce',
+  generoso: 'Generoso',
 };
 
 interface Props {
@@ -33,6 +43,7 @@ export default function CatalogueSearch({ entries }: Props) {
   const fAnada = useSignal('');
   const fDo = useSignal('');
   const fBodega = useSignal('');
+  const fTipo = useSignal('');
 
   const fc = useComputed(() => facets(data.value));
   const visible = useComputed(() =>
@@ -40,9 +51,28 @@ export default function CatalogueSearch({ entries }: Props) {
       anada: fAnada.value || undefined,
       denominacionOrigen: fDo.value || undefined,
       bodega: fBodega.value || undefined,
+      tipo: fTipo.value || undefined,
     }),
   );
-  const active = useComputed(() => !!(query.value || fAnada.value || fDo.value || fBodega.value));
+  const active = useComputed(
+    () => !!(query.value || fAnada.value || fDo.value || fBodega.value || fTipo.value),
+  );
+
+  const clear = () => {
+    query.value = '';
+    fAnada.value = '';
+    fDo.value = '';
+    fBodega.value = '';
+    fTipo.value = '';
+  };
+
+  // Wire the server-rendered "Limpiar búsqueda" control inside #no-results.
+  useEffect(() => {
+    const btn = document.getElementById('no-results-clear');
+    if (!btn) return;
+    btn.addEventListener('click', clear);
+    return () => btn.removeEventListener('click', clear);
+  }, []);
 
   // Reflect the result onto the server-rendered grid imperatively — cards are NOT
   // re-rendered, so the build-optimised <Image/> stays intact. Client-only.
@@ -64,16 +94,18 @@ export default function CatalogueSearch({ entries }: Props) {
         }
       }
     });
-    const noRes = document.getElementById('no-results');
-    if (noRes) noRes.hidden = result.size !== 0;
-  });
 
-  const clear = () => {
-    query.value = '';
-    fAnada.value = '';
-    fDo.value = '';
-    fBodega.value = '';
-  };
+    // Header count reflects the filtered results (FR-018).
+    const count = result.size;
+    const countEl = document.getElementById('wine-count');
+    if (countEl) countEl.textContent = `${count} ${count === 1 ? 'vino' : 'vinos'}`;
+
+    // No-results state + highlighted search term (FR-017).
+    const noRes = document.getElementById('no-results');
+    if (noRes) noRes.hidden = count !== 0;
+    const term = document.querySelector<HTMLElement>('.no-results__term');
+    if (term) term.textContent = query.value.trim() ? `«${query.value.trim()}»` : 'tu búsqueda';
+  });
 
   return (
     <div class="search" role="search">
@@ -81,10 +113,20 @@ export default function CatalogueSearch({ entries }: Props) {
         type="search"
         class="search__input"
         aria-label="Buscar vinos"
-        placeholder="Buscar por nombre, bodega, D.O. o añada…"
+        placeholder="Buscar"
         value={query.value}
         onInput={(e) => (query.value = (e.currentTarget as HTMLInputElement).value)}
       />
+      <select
+        aria-label="Tipo"
+        value={fTipo.value}
+        onChange={(e) => (fTipo.value = (e.currentTarget as HTMLSelectElement).value)}
+      >
+        <option value="">Tipo (todos)</option>
+        {fc.value.tipo.map((v) => (
+          <option value={v}>{TIPO_LABEL[v] ?? v}</option>
+        ))}
+      </select>
       <select
         aria-label="Añada"
         value={fAnada.value}
@@ -120,7 +162,7 @@ export default function CatalogueSearch({ entries }: Props) {
           Limpiar
         </button>
       )}
-      <p class="search__status" role="status" aria-live="polite">
+      <p class="search__status sr-only" role="status" aria-live="polite">
         {visible.value.size} vino{visible.value.size === 1 ? '' : 's'}
       </p>
     </div>

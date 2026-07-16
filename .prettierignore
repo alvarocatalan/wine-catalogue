@@ -1,6 +1,8 @@
 dist/
 .astro/
 node_modules/
+# Vendored design-handoff prototype (reference only, not our source).
+design/
 package-lock.json
 playwright-report/
 test-results/

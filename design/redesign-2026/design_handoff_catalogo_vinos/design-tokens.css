@@ -1,0 +1,60 @@
+/* Catálogo de vinos — design tokens
+   El repo usa CSS plano con custom properties (src/styles/global.css). NO hay Tailwind.
+   Fusiona estas variables dentro de tu global.css.
+   Los colores por tipo solo aplican si extiendes el schema (Vía B del README). */
+
+:root {
+  /* Superficies / fondo */
+  --wine-bg:            #f5f0e7; /* crema base */
+  --wine-surface:       #faf5ee; /* superficie clara */
+  --wine-panel-a:       #e7e4de; /* panel botella (gradiente 160deg) */
+  --wine-panel-b:       #f1efea;
+
+  /* Marca burdeos */
+  --wine-burgundy:      #6b2c37;
+  --wine-on-burgundy:   #f0e4d9;
+  --wine-burgundy-tint: #d8a9a3; /* overline */
+  --wine-burgundy-sub:  #e6cfc9; /* subtítulo */
+
+  /* Texto */
+  --wine-ink:           #2a2723; /* principal */
+  --wine-ink-body:      #4a453d; /* notas de cata */
+  --wine-text-2:        #8a8172; /* secundario */
+  --wine-text-3:        #b3a894; /* terciario */
+  --wine-label:         #a49a86; /* etiquetas de dato */
+  --wine-gold:          #8f7a4a; /* etiquetas de notas / detalles */
+
+  /* Líneas */
+  --wine-hairline:      #ded6c6;
+  --wine-hairline-2:    #e6dfd1;
+
+  /* Colores por tipo de vino */
+  --tipo-tinto:     #6b2c37;
+  --tipo-blanco:    #9a7d2e;
+  --tipo-rosado:    #a86b73;
+  --tipo-espumoso:  #7d8a5a;
+  --tipo-dulce:     #9c5f2a;
+  --tipo-generoso:  #7a4a2a;
+
+  /* Tipografía */
+  --font-display: "Playfair Display", serif;
+  --font-body:    "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  /* Radios */
+  --radius-bottle: 6px;
+  --radius-card:   16px;
+  --radius-card-1c:12px;
+  --radius-panel:  20px;
+  --radius-pill:   100px;
+
+  /* Sombras / efectos */
+  --shadow-bottle: radial-gradient(ellipse, rgba(40,35,28,.22), transparent 70%);
+  --shadow-card:   0 12px 30px -20px rgba(40,35,28,.4);
+
+  /* Layout */
+  --container-index: 1160px;
+  --container-detail: 1080px;
+
+  /* Transición hover tarjeta */
+  --ease-card: cubic-bezier(.2,.7,.2,1);
+}

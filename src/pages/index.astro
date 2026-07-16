@@ -7,25 +7,49 @@ import { orderByNewest } from '../lib/order';
 
 const wines = orderByNewest(await getCollection('vinos'));
 
-// Build-time text search index consumed by the in-memory search island (T037).
-// Embedded JSON — NOT Pagefind (research Decision 7). The island hydrates over it.
+// Build-time text search index consumed by the in-memory search island.
+// Embedded JSON — NOT Pagefind. The island hydrates over it. `tipo` is included
+// so the type facet + free-text search can operate on it (T025 / FR-016).
 const searchIndex = wines.map((w) => ({
   slug: w.id,
   nombre: w.data.nombre,
   bodega: w.data.bodega,
   denominacionOrigen: w.data.denominacionOrigen,
   anada: w.data.anada,
+  tipo: w.data.tipo,
 }));
+
+const count = wines.length;
+const countLabel = `${count} ${count === 1 ? 'vino' : 'vinos'}`;
 ---
 
 <BaseLayout title="Catálogo de vinos">
-  <main class="wrap">
-    <h1 class="site-title">Catálogo de vinos</h1>
+  <header class="hero">
+    <p class="hero__overline">Colección personal · Est. 2019</p>
+    <h1 class="hero__title">Catálogo de vinos</h1>
+    <p class="hero__subtitle">Una selección personal, botella a botella.</p>
     {wines.length > 0 && <CatalogueSearch client:load />}
+  </header>
+
+  <main class="wrap">
+    <div class="section-head">
+      <h2 class="section-head__title">La colección</h2>
+      <span id="wine-count" class="section-head__count" data-total={count}>{countLabel}</span>
+    </div>
+
     <WineGrid wines={wines} />
-    <div id="no-results" class="empty" hidden role="status">
-      <p>Sin resultados. Prueba con otro término o quita los filtros.</p>
+
+    <div id="no-results" class="no-results" hidden role="status">
+      <span class="no-results__icon" aria-hidden="true">⌕</span>
+      <p class="no-results__title">Sin resultados</p>
+      <p class="no-results__help">
+        No hay vinos que coincidan con <span class="no-results__term"></span>. Prueba con otro
+        término o quita los filtros.
+      </p>
+      <button type="button" class="no-results__clear" id="no-results-clear">Limpiar búsqueda</button
+      >
     </div>
   </main>
+
   <script type="application/json" id="wine-search-index" set:html={JSON.stringify(searchIndex)} />
 </BaseLayout>

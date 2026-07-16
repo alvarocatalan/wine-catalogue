@@ -2,12 +2,13 @@
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import { anadaIsFuture } from '../lib/vintage';
+import TypeLabel from './TypeLabel.astro';
 
 interface Props {
   wine: CollectionEntry<'vinos'>;
 }
 const { wine } = Astro.props;
-const { nombre, bodega, denominacionOrigen, anada, foto, fotoAlt } = wine.data;
+const { nombre, bodega, denominacionOrigen, anada, tipo, foto, fotoAlt } = wine.data;
 const base = import.meta.env.BASE_URL;
 const future = anadaIsFuture(anada);
 ---
@@ -19,18 +20,23 @@ const future = anadaIsFuture(anada);
   data-bodega={bodega}
   data-do={denominacionOrigen}
   data-anada={anada}
+  data-tipo={tipo}
 >
   <a href={`${base}vinos/${wine.id}/`}>
-    <Image
-      src={foto}
-      alt={fotoAlt}
-      widths={[220, 440]}
-      sizes="(max-width: 700px) 50vw, 220px"
-      onerror={`this.onerror=null;this.src='${base}placeholder.svg'`}
-    />
+    <div class="card__panel">
+      <Image
+        src={foto}
+        alt={fotoAlt}
+        widths={[220, 440]}
+        sizes="(max-width: 700px) 50vw, 220px"
+        onerror={`this.onerror=null;this.src='${base}placeholder.svg'`}
+      />
+    </div>
     <div class="card__body">
       <p class="card__name">{nombre}</p>
       <p class="card__meta">{bodega} · {anada}</p>
+      <p class="card__do">{denominacionOrigen}</p>
+      <TypeLabel tipo={tipo} variant="card" />
       {future && <span class="flag">añada futura</span>}
       <span class="card__match" hidden></span>
     </div>

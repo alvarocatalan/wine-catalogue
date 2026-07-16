@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  a { color: #6b2c37; text-decoration: none; }
+  a:hover { color: #8f5560; }
+  .wine-card { transition: transform .38s cubic-bezier(.2,.7,.2,1); }
+  .search-input::placeholder { color: rgba(240,228,217,.4); letter-spacing:.02em; }
+  .fade-in { animation: fadeIn .4s ease both; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px);} to { opacity:1; transform:none; } }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#f5f0e7; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#2a2723;">
+
+  <!-- ==================== HOME ==================== -->
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+  <div class="fade-in">
+
+    <!-- Hero burdeos -->
+    <div style="background:#6b2c37; color:#f0e4d9; padding:84px 40px 64px; text-align:center;">
+      <div style="font-size:11px; letter-spacing:.34em; text-transform:uppercase; color:#d8a9a3; margin-bottom:22px;">Colección personal · Est. 2019</div>
+      <div style="font-family:'Playfair Display',serif; font-weight:500; font-size:72px; line-height:1; letter-spacing:.01em;">Catálogo de Vinos</div>
+      <div style="font-family:'Playfair Display',serif; font-style:italic; font-weight:400; font-size:23px; color:#e6cfc9; margin-top:18px;">Una biblioteca de cata, botella a botella.</div>
+
+      <!-- Buscador casi imperceptible -->
+      <div style="max-width:400px; margin:46px auto 0; position:relative; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(240,228,217,.28); padding:0 4px 10px;">
+        <span style="color:rgba(240,228,217,.45); font-size:15px;">⌕</span>
+        <input class="search-input" type="text" value="{{ query }}" onChange="{{ onSearch }}" placeholder="Buscar" style="width:100%; border:none; outline:none; background:transparent; color:#f0e4d9; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:15px; letter-spacing:.02em; padding:0;">
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div style="max-width:1160px; margin:0 auto; padding:44px 40px 88px;">
+      <div style="display:flex; align-items:baseline; justify-content:space-between; border-bottom:1px solid #ded6c6; padding-bottom:16px; margin-bottom:40px;">
+        <div style="font-family:'Playfair Display',serif; font-size:26px; color:#2a2723;">La colección</div>
+        <div style="font-size:13px; letter-spacing:.02em; color:#8a8172;">{{ count }} vinos</div>
+      </div>
+
+      <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:36px 28px;">
+        <sc-for list="{{ wines }}" as="item" hint-placeholder-count="8">
+          <div class="wine-card" onClick="{{ item.open }}" style="cursor:pointer; text-align:center;" style-hover="transform:translateY(-8px)">
+            <div style="background:linear-gradient(160deg,#e7e4de,#f1efea); border-radius:16px; padding:34px 20px 28px;">
+              <div style="display:flex; flex-direction:column; align-items:center;">
+                <div style="width:16px; height:36px; background:repeating-linear-gradient(0deg,#d8d3c8 0 5px,#e2ded4 5px 10px); border-radius:5px 5px 0 0;"></div>
+                <div style="width:54px; height:126px; background:repeating-linear-gradient(0deg,#d5d0c4 0 6px,#e0dbcf 6px 12px); border-radius:6px 6px 9px 9px; display:flex; align-items:center; justify-content:center;">
+                  <span style="font-family:ui-monospace,monospace; font-size:8px; color:#9a9385; transform:rotate(-90deg); white-space:nowrap;">foto botella</span>
+                </div>
+                <div style="width:66px; height:9px; margin-top:9px; background:radial-gradient(ellipse,rgba(40,35,28,.22),transparent 70%);"></div>
+              </div>
+            </div>
+            <div style="font-family:'Playfair Display',serif; font-size:23px; color:#2a2723; margin-top:18px; line-height:1.15;">{{ item.nombre }}</div>
+            <div style="font-size:12.5px; color:#8a8172; margin-top:5px;">{{ item.bodega }} · {{ item.anada }}</div>
+            <div style="font-size:12px; color:#b3a894; margin-top:2px;">{{ item.region }}</div>
+            <div style="margin-top:12px; display:inline-flex; align-items:center; gap:7px;">
+              <span style="width:7px; height:7px; border-radius:50%; background:{{ item.tipoColor }};"></span>
+              <span style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:{{ item.tipoColor }};">{{ item.tipo }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      </sc-if>
+
+      <!-- Sin resultados -->
+      <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+      <div class="fade-in" style="text-align:center; padding:80px 20px 60px;">
+        <div style="font-size:34px; color:#c9b79b; margin-bottom:20px;">⌕</div>
+        <div style="font-family:'Playfair Display',serif; font-size:30px; color:#2a2723;">Sin resultados</div>
+        <div style="font-size:15px; line-height:1.6; color:#8a8172; margin-top:12px; max-width:380px; margin-left:auto; margin-right:auto;">No hay vinos que coincidan con “<span style="color:#6b2c37;">{{ query }}</span>”. Prueba con otra bodega, uva o región.</div>
+        <div onClick="{{ clear }}" style="cursor:pointer; display:inline-block; margin-top:26px; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:#6b2c37; border-bottom:1.5px solid #6b2c37; padding-bottom:4px;">Limpiar búsqueda</div>
+      </div>
+      </sc-if>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ==================== FICHA DE DETALLE ==================== -->
+  <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+  <div class="fade-in">
+
+    <div style="background:#6b2c37; color:#f0e4d9; padding:22px 40px;">
+      <div style="max-width:1080px; margin:0 auto; display:flex; align-items:center; gap:18px;">
+        <span onClick="{{ back }}" style="cursor:pointer; font-size:13px; letter-spacing:.1em; color:#e6cfc9; display:inline-flex; align-items:center; gap:8px;">← Volver al catálogo</span>
+      </div>
+    </div>
+
+    <div style="max-width:1080px; margin:0 auto; padding:60px 40px 96px; display:grid; grid-template-columns:0.85fr 1.15fr; gap:72px; align-items:start;">
+
+      <!-- Imagen botella -->
+      <div style="position:sticky; top:32px; background:linear-gradient(160deg,#e7e4de,#f1efea); border-radius:20px; padding:64px 40px 48px; text-align:center;">
+        <div style="display:inline-flex; flex-direction:column; align-items:center;">
+          <div style="width:26px; height:64px; background:repeating-linear-gradient(0deg,#d8d3c8 0 6px,#e2ded4 6px 12px); border-radius:8px 8px 0 0;"></div>
+          <div style="width:96px; height:246px; background:repeating-linear-gradient(0deg,#d5d0c4 0 7px,#e0dbcf 7px 14px); border-radius:10px 10px 14px 14px; display:flex; align-items:center; justify-content:center;">
+            <span style="font-family:ui-monospace,monospace; font-size:11px; color:#9a9385; transform:rotate(-90deg); white-space:nowrap;">foto botella</span>
+          </div>
+          <div style="width:120px; height:14px; margin-top:16px; background:radial-gradient(ellipse,rgba(40,35,28,.24),transparent 70%);"></div>
+        </div>
+      </div>
+
+      <!-- Ficha de datos -->
+      <div>
+        <div style="display:inline-flex; align-items:center; gap:8px; margin-bottom:16px;">
+          <span style="width:8px; height:8px; border-radius:50%; background:{{ sel.tipoColor }};"></span>
+          <span style="font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:{{ sel.tipoColor }};">{{ sel.tipo }}</span>
+        </div>
+        <div style="font-family:'Playfair Display',serif; font-weight:500; font-size:52px; line-height:1.02; color:#2a2723;">{{ sel.nombre }}</div>
+        <div style="font-family:'Playfair Display',serif; font-style:italic; font-size:22px; color:#8a8172; margin-top:10px;">{{ sel.bodega }}</div>
+
+        <!-- Datos estructurados -->
+        <div style="margin-top:36px; border-top:1px solid #ded6c6;">
+          <sc-for list="{{ sel.datos }}" as="d" hint-placeholder-count="6">
+            <div style="display:flex; justify-content:space-between; gap:24px; padding:13px 0; border-bottom:1px solid #e6dfd1;">
+              <span style="font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#a49a86;">{{ d.k }}</span>
+              <span style="font-size:15px; color:#2a2723; text-align:right;">{{ d.v }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- Notas de cata -->
+        <div style="margin-top:44px;">
+          <div style="font-family:'Playfair Display',serif; font-size:28px; color:#2a2723; margin-bottom:8px;">Notas de cata</div>
+          <sc-for list="{{ sel.notas }}" as="n" hint-placeholder-count="4">
+            <div style="margin-top:22px;">
+              <div style="font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#8f7a4a; margin-bottom:7px;">{{ n.k }}</div>
+              <div style="font-size:16px; line-height:1.72; color:#4a453d; max-width:560px;">{{ n.v }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { view: 'home', query: '', selectedId: null };
+
+  TIPO_COLOR = { tinto:'#6b2c37', blanco:'#9a7d2e', rosado:'#a86b73', espumoso:'#7d8a5a', dulce:'#9c5f2a', generoso:'#7a4a2a' };
+
+  WINES = [
+    { id:'unico', nombre:'Vega Sicilia Único', bodega:'Vega Sicilia', anada:2015, tipo:'tinto',
+      uva:['Tempranillo','Cabernet Sauvignon'], region:'Ribera del Duero', pais:'España', graduacion:14, precio:480,
+      maridaje:['Caza mayor','Cordero asado','Quesos curados'], enlaceBodega:'https://www.vega-sicilia.com',
+      notas:{ vista:'Rojo picota profundo con ribete granate y lágrima densa y lenta.',
+              nariz:'Compleja y elegante: fruta negra madura, especias dulces, cuero, tabaco y un fondo balsámico de crianza larga.',
+              boca:'Amplio y sedoso, con taninos pulidos y una acidez que sostiene un final interminable de frutos del bosque y regaliz.',
+              conclusion:'Un clásico atemporal en plena forma; guarda todavía una década larga de evolución en botella.' } },
+    { id:'senorans', nombre:'Pazo Señorans', bodega:'Pazo Señorans', anada:2022, tipo:'blanco',
+      uva:['Albariño'], region:'Rías Baixas', pais:'España', graduacion:12.5, precio:16,
+      maridaje:['Marisco','Pescado blanco','Arroces'], enlaceBodega:'https://www.pazodesenorans.com',
+      notas:{ vista:'Amarillo pajizo brillante con reflejos verdosos.',
+              nariz:'Intensa y frutal: manzana verde, cítricos, flores blancas y un matiz salino atlántico.',
+              boca:'Fresco y vibrante, con acidez marcada y un final largo y sabroso.',
+              conclusion:'La expresión pura del Albariño; directo, mineral y muy gastronómico.' } },
+    { id:'terrers', nombre:'Recaredo Terrers', bodega:'Recaredo', anada:2019, tipo:'espumoso',
+      uva:['Xarel·lo','Macabeo','Parellada'], region:'Penedès', pais:'España', graduacion:12, precio:28,
+      maridaje:['Aperitivos','Sushi','Aves'], enlaceBodega:'https://www.recaredo.com',
+      notas:{ vista:'Dorado pálido con una burbuja fina, persistente y en cordón.',
+              nariz:'Notas de bollería, frutos secos, manzana asada y un fondo tostado de larga crianza sobre lías.',
+              boca:'Cremoso y seco (brut nature), con burbuja integrada y un final cítrico y mineral.',
+              conclusion:'Un espumoso de terruño, serio y digestivo, muy lejos del cava industrial.' } },
+    { id:'ygay', nombre:'Castillo Ygay', bodega:'Marqués de Murrieta', anada:2011, tipo:'tinto',
+      uva:['Tempranillo','Mazuelo'], region:'Rioja', pais:'España', graduacion:13.5, precio:60,
+      maridaje:['Carnes rojas','Guisos','Setas'], enlaceBodega:'https://www.marquesdemurrieta.com',
+      notas:{ vista:'Rubí granate con ribete atejado propio de la gran reserva.',
+              nariz:'Elegante y clásica: fruta roja en licor, especias, cuero, tabaco de pipa y notas de crianza en roble.',
+              boca:'Equilibrado y fino, con taninos maduros y una acidez fresca que alarga el final especiado.',
+              conclusion:'La quintaesencia del Rioja de guarda; sereno, complejo y para descorchar sin prisa.' } },
+    { id:'muga-rosado', nombre:'Muga Rosado', bodega:'Bodegas Muga', anada:2023, tipo:'rosado',
+      uva:['Garnacha','Viura','Tempranillo'], region:'Rioja', pais:'España', graduacion:13, precio:12,
+      maridaje:['Ensaladas','Arroces','Pescado azul'], enlaceBodega:'https://www.bodegasmuga.com',
+      notas:{ vista:'Rosa pálido con reflejos salmón, limpio y brillante.',
+              nariz:'Fresa, frambuesa, flores blancas y un toque cítrico muy delicado.',
+              boca:'Seco y sedoso, con buena acidez y un final fresco y afrutado.',
+              conclusion:'Un rosado elegante de estilo provenzal, versátil en la mesa.' } },
+    { id:'pingus', nombre:'Pingus', bodega:'Dominio de Pingus', anada:2019, tipo:'tinto',
+      uva:['Tempranillo'], region:'Ribera del Duero', pais:'España', graduacion:14.5, precio:1100,
+      maridaje:['Carne de caza','Cordero','Quesos añejos'], enlaceBodega:'https://www.dominiodepingus.com',
+      notas:{ vista:'Negro impenetrable con ribete violáceo intenso.',
+              nariz:'Explosiva y concentrada: fruta negra, grafito, flores oscuras y especias, con una madera perfectamente integrada.',
+              boca:'Enorme pero vertical, con taninos aterciopelados y una acidez que lo mantiene fresco pese a la potencia.',
+              conclusion:'Uno de los grandes de España; un vino de culto de guarda muy larga.' } },
+    { id:'px1927', nombre:'Alvear PX 1927', bodega:'Alvear', anada:2020, tipo:'dulce',
+      uva:['Pedro Ximénez'], region:'Montilla-Moriles', pais:'España', graduacion:17, precio:14,
+      maridaje:['Postres de chocolate','Helado','Queso azul'], enlaceBodega:'https://www.alvear.es',
+      notas:{ vista:'Caoba oscuro, denso y untuoso, casi opaco.',
+              nariz:'Higos, dátiles, uva pasa, café y regaliz sobre un fondo tostado.',
+              boca:'Dulzor intenso equilibrado por una acidez sorprendente; textura de jarabe y final larguísimo.',
+              conclusion:'Un PX goloso y elegante, delicioso sobre un helado de vainilla.' } },
+    { id:'mardefrades', nombre:'Mar de Frades', bodega:'Mar de Frades', anada:2022, tipo:'blanco',
+      uva:['Albariño'], region:'Rías Baixas', pais:'España', graduacion:12.5, precio:18,
+      maridaje:['Ostras','Almejas','Pescado a la plancha'], enlaceBodega:'https://www.mardefrades.es',
+      notas:{ vista:'Amarillo pálido limpio con reflejos verdosos.',
+              nariz:'Fruta blanca, hinojo, cítricos y una salinidad marina muy característica.',
+              boca:'Fresco y equilibrado, con acidez viva y un final sápido.',
+              conclusion:'Albariño atlántico de libro; fresco, salino y muy fácil de disfrutar.' } },
+    { id:'tondonia', nombre:'Tondonia Reserva', bodega:'R. López de Heredia', anada:2010, tipo:'tinto',
+      uva:['Tempranillo','Garnacho','Graciano'], region:'Rioja', pais:'España', graduacion:13, precio:35,
+      maridaje:['Cocido','Aves de corral','Setas'], enlaceBodega:'https://www.lopezdeheredia.com',
+      notas:{ vista:'Rubí de capa media con ribete anaranjado, translúcido y evolucionado.',
+              nariz:'Fruta roja marchita, hierbas secas, cuero, madera vieja y un fondo balsámico inconfundible.',
+              boca:'Fino y sutil, con taninos ya resueltos y una acidez fresca que invita a otra copa.',
+              conclusion:'Un Rioja de estilo tradicional único en el mundo; delicado y profundamente evocador.' } },
+    { id:'tiopepe', nombre:'Tío Pepe Fino', bodega:'González Byass', anada:2023, tipo:'generoso',
+      uva:['Palomino Fino'], region:'Jerez', pais:'España', graduacion:15, precio:10,
+      maridaje:['Jamón ibérico','Almendras','Boquerones'], enlaceBodega:'https://www.tiopepe.com',
+      notas:{ vista:'Amarillo pálido brillante, limpio y luminoso.',
+              nariz:'Punzante y seca: almendra, masa madre, notas yodadas y el aroma inconfundible del velo de flor.',
+              boca:'Muy seco, ligero y salino, con un final amargoso y refrescante.',
+              conclusion:'El fino por antonomasia; frío y con una tapa, imbatible.' } },
+  ];
+
+  onSearch = (e) => this.setState({ query: e.target.value });
+  open(id) { this.setState({ view:'detail', selectedId:id }); if (typeof window !== 'undefined') window.scrollTo(0, 0); }
+  back() { this.setState({ view:'home' }); }
+
+  cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+
+  renderVals() {
+    const q = this.state.query.trim().toLowerCase();
+    const match = (w) => {
+      if (!q) return true;
+      const hay = [w.nombre, w.bodega, w.tipo, w.region, String(w.anada)].join(' ').toLowerCase();
+      return hay.includes(q);
+    };
+    const wines = this.WINES.filter(match).map(w => ({
+      ...w, tipo: this.cap(w.tipo), tipoColor: this.TIPO_COLOR[w.tipo] || '#6b2c37',
+      open: () => this.open(w.id),
+    }));
+
+    const raw = this.WINES.find(w => w.id === this.state.selectedId);
+    let sel = null;
+    if (raw) {
+      sel = {
+        ...raw, tipo: this.cap(raw.tipo), tipoColor: this.TIPO_COLOR[raw.tipo] || '#6b2c37',
+        datos: [
+          { k:'Bodega', v: raw.bodega },
+          { k:'D.O.', v: raw.region },
+          { k:'Añada', v: String(raw.anada) },
+        ],
+        notas: [
+          { k:'Vista', v: raw.notas.vista },
+          { k:'Nariz', v: raw.notas.nariz },
+          { k:'Boca', v: raw.notas.boca },
+          { k:'Conclusión', v: raw.notas.conclusion },
+        ],
+      };
+    }
+
+    return {
+      isHome: this.state.view === 'home',
+      isDetail: this.state.view === 'detail',
+      wines, count: wines.length, hasResults: wines.length > 0, noResults: wines.length === 0,
+      query: this.state.query, onSearch: this.onSearch,
+      clear: () => this.setState({ query:'' }),
+      back: () => this.back(), sel,
+    };
+  }
+}
+</script>
+</body>
+</html>

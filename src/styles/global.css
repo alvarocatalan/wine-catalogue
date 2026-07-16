@@ -1,193 +1,543 @@
-/* Minimalist design tokens + layout (FR-015). Plain CSS for now; the Tailwind
-   design-system task (T002) is deferred. High-contrast palette (WCAG 2.1 AA). */
+/* ===========================================================================
+   Wine Catalogue — design system (feature 002-wine-redesign-tipo)
+   Plain CSS with custom-property tokens (no framework). Tokens merged from
+   design/redesign-2026/design_handoff_catalogo_vinos/design-tokens.css (T002).
+   High-fidelity editorial redesign; WCAG 2.1 AA.
+   =========================================================================== */
+
+/* --- Self-hosted Playfair Display (T003) — subset WOFF2 in src/assets/fonts/.
+   Relative url() so Vite bundles + rewrites them with the correct site base
+   (prod deploys under /wine-catalogue/). Only the weights the design uses:
+   400 + 500 (display/names) and 400 italic (subtitle / winery line).
+   font-display: swap avoids invisible text (FOIT). --------------------------- */
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/playfair-display-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/playfair-display-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/playfair-display-latin-400-italic.woff2') format('woff2');
+}
+
 :root {
-  --bg: #fcfbf9;
-  --fg: #1b1b1b;
-  --muted: #565248;
-  --accent: #7a1f38;
-  --line: #e4e0d8;
-  --flag-fg: #6b4200;
-  --flag-bg: #fff4e0;
-  --radius: 10px;
-  --max: 1100px;
+  /* Surfaces / background */
+  --wine-bg: #f5f0e7;
+  --wine-surface: #faf5ee;
+  --wine-panel-a: #e7e4de;
+  --wine-panel-b: #f1efea;
+
+  /* Burgundy brand */
+  --wine-burgundy: #6b2c37;
+  --wine-on-burgundy: #f0e4d9;
+  --wine-burgundy-tint: #d8a9a3;
+  --wine-burgundy-sub: #e6cfc9;
+
+  /* Text. Secondary/tertiary/label greys are DARKENED from the design's soft
+     values (#8a8172 / #b3a894 / #a49a86) to meet WCAG AA (4.5:1) on the cream
+     background for small text (Principle III / FR-021). Ink + notes unchanged. */
+  --wine-ink: #2a2723;
+  --wine-ink-body: #4a453d;
+  --wine-text-2: #665f54; /* was #8a8172 → 5.6:1 */
+  --wine-text-3: #6e675b; /* was #b3a894 → 4.9:1 */
+  --wine-label: #6a6358; /* was #a49a86 → 5.2:1 */
+  --wine-gold: #6f5e2e; /* was #8f7a4a → 5.6:1 (used by the rare .flag) */
+
+  /* Hairlines */
+  --wine-hairline: #ded6c6;
+  --wine-hairline-2: #e6dfd1;
+
+  /* Per-type colours (contracts/type-taxonomy.md). `--tipo-*` is the on-brand DOT
+     colour; `--tipo-*-text` is the AA-compliant label TEXT colour on cream (text
+     carries the meaning, colour reinforces — WCAG 1.4.1). */
+  --tipo-tinto: #6b2c37;
+  --tipo-blanco: #9a7d2e;
+  --tipo-rosado: #a86b73;
+  --tipo-espumoso: #7d8a5a;
+  --tipo-dulce: #9c5f2a;
+  --tipo-generoso: #7a4a2a;
+  --tipo-tinto-text: #6b2c37; /* 9.1:1 */
+  --tipo-blanco-text: #816927; /* 4.6:1 */
+  --tipo-rosado-text: #905c63; /* 4.8:1 */
+  --tipo-espumoso-text: #646e48; /* 4.8:1 */
+  --tipo-dulce-text: #995d29; /* 4.7:1 */
+  --tipo-generoso-text: #7a4a2a; /* 6.5:1 */
+
+  /* Typography */
+  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-body: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+  /* Radii */
+  --radius-bottle: 6px;
+  --radius-card: 16px;
+  --radius-card-1c: 12px;
+  --radius-panel: 20px;
+  --radius-pill: 100px;
+
+  /* Shadows / effects */
+  --shadow-bottle: radial-gradient(ellipse, rgba(40, 35, 28, 0.22), transparent 70%);
+  --shadow-card: 0 12px 30px -20px rgba(40, 35, 28, 0.4);
+
+  /* Layout */
+  --container-index: 1160px;
+  --container-detail: 1080px;
+
+  /* Card hover easing */
+  --ease-card: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 * {
   box-sizing: border-box;
 }
 
+/* Screen-reader-only (visually hidden but announced). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--fg);
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    Helvetica,
-    Arial,
-    sans-serif;
+  background: var(--wine-bg);
+  color: var(--wine-ink);
+  font-family: var(--font-body);
   line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
-  color: var(--accent);
+  color: var(--wine-burgundy);
 }
 
-/* Visible keyboard focus (WCAG 2.4.7). Accent ring on the cream bg clears the
-   3:1 non-text contrast bar (WCAG 1.4.11). Only for keyboard focus, not clicks. */
+/* Visible keyboard focus (WCAG 2.4.7 / 1.4.11). Keyboard focus only. */
 :focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--wine-burgundy);
   outline-offset: 2px;
   border-radius: 2px;
 }
 
+/* View entrance — a subtle transform-only slide (no opacity, so text contrast is
+   always full for a11y), suppressed under reduced-motion (T016/T020). */
+@media (prefers-reduced-motion: no-preference) {
+  main {
+    animation: view-rise 0.4s ease both;
+  }
+  @keyframes view-rise {
+    from {
+      transform: translateY(8px);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+}
+
 .wrap {
-  max-width: var(--max);
+  max-width: var(--container-index);
   margin: 0 auto;
   padding: 2rem 1.25rem;
 }
 
 .site-title {
+  font-family: var(--font-display);
   font-size: 1.6rem;
   letter-spacing: -0.01em;
   margin: 0 0 1.5rem;
 }
 
+/* ===========================================================================
+   US1 — Home: hero, section header, grid, cards, search island, states (T016)
+   =========================================================================== */
+
+/* --- Hero (burgundy) --- */
+.hero {
+  background: var(--wine-burgundy);
+  color: var(--wine-on-burgundy);
+  text-align: center;
+  padding: clamp(48px, 8vw, 84px) clamp(20px, 5vw, 40px) clamp(40px, 6vw, 64px);
+}
+.hero__overline {
+  margin: 0 0 18px;
+  font-size: 11px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--wine-burgundy-tint);
+}
+.hero__title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(40px, 8vw, 72px);
+  line-height: 1;
+  margin: 0;
+  color: var(--wine-on-burgundy);
+}
+.hero__subtitle {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(18px, 3.5vw, 23px);
+  margin: 18px 0 0;
+  color: var(--wine-burgundy-sub);
+}
+
+/* --- Home container + section header --- */
+.wrap {
+  padding: 44px clamp(16px, 5vw, 40px) 88px;
+}
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 14px;
+  margin: 0 0 36px;
+  border-bottom: 1px solid var(--wine-hairline);
+}
+.section-head__title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 26px;
+  margin: 0;
+  color: var(--wine-ink);
+}
+.section-head__count {
+  font-size: 13px;
+  color: var(--wine-text-2);
+  white-space: nowrap;
+}
+
+/* --- Grid --- */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 36px 28px;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
+/* --- Card --- */
 .card {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: #fff;
+  --lift: 0;
 }
-
-.card a {
+.card > a {
   display: block;
   color: inherit;
   text-decoration: none;
 }
-
-.card img {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
+.card__panel {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: linear-gradient(160deg, var(--wine-panel-a), var(--wine-panel-b));
+  border-radius: var(--radius-card);
+  padding: 34px 20px 28px;
+}
+.card__panel img {
   display: block;
-  background: #f0ede7;
+  width: auto;
+  max-width: 100%;
+  height: 190px;
+  object-fit: contain;
+  filter: drop-shadow(0 16px 12px rgba(40, 35, 28, 0.22));
 }
-
 .card__body {
-  padding: 0.75rem 0.9rem 1rem;
+  text-align: center;
+  padding: 16px 8px 4px;
 }
-
 .card__name {
-  font-weight: 600;
-  margin: 0 0 0.15rem;
+  font-family: var(--font-display);
+  font-size: 23px;
+  color: var(--wine-ink);
+  margin: 0 0 6px;
 }
-
 .card__meta {
-  color: var(--muted);
-  font-size: 0.9rem;
-  margin: 0;
+  font-size: 12.5px;
+  color: var(--wine-text-2);
+  margin: 0 0 2px;
+}
+.card__do {
+  font-size: 12px;
+  color: var(--wine-text-3);
+  margin: 0 0 10px;
+}
+.card .type-label {
+  justify-content: center;
 }
 
+/* --- Type label chip (TypeLabel.astro; contracts/type-taxonomy.md) --- */
+.type-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  color: var(--chip-text);
+  font-family: var(--font-body);
+  text-transform: uppercase;
+  font-weight: 600;
+  line-height: 1;
+}
+.type-label__dot {
+  flex: none;
+  border-radius: var(--radius-pill);
+  background: var(--chip);
+}
+.type-label--card {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+}
+.type-label--card .type-label__dot {
+  width: 7px;
+  height: 7px;
+}
+.type-label--detail {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+}
+.type-label--detail .type-label__dot {
+  width: 8px;
+  height: 8px;
+}
 .flag {
   display: inline-block;
-  margin-top: 0.4rem;
-  font-size: 0.75rem;
-  color: var(--flag-fg);
-  background: var(--flag-bg);
-  border-radius: 4px;
-  padding: 0.05rem 0.4rem;
+  margin-top: 8px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--wine-gold);
+}
+.card__match {
+  display: block;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--wine-text-2);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .card {
+    transition: transform 0.38s var(--ease-card);
+  }
+  .card:hover,
+  .card:focus-within {
+    transform: translateY(-8px);
+  }
 }
 
-.empty {
-  text-align: center;
-  padding: 4rem 1rem;
-  color: var(--muted);
-}
-
-/* Search / filter island */
+/* --- Search island (in the hero) --- */
 .search {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
+  gap: 14px;
   align-items: center;
-  margin-bottom: 1.5rem;
+  justify-content: center;
+  max-width: 680px;
+  margin: 34px auto 0;
 }
 .search__input {
   flex: 1 1 260px;
-  min-width: 200px;
-  padding: 0.5rem 0.7rem;
-  font-size: 1rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: #fff;
-  color: var(--fg);
+  max-width: 400px;
+  padding: 9px 6px 9px 26px;
+  font-size: 16px;
+  color: var(--wine-on-burgundy);
+  background: transparent
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23e6cfc9' stroke-width='1.6' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E")
+    no-repeat left center;
+  border: none;
+  border-bottom: 1px solid rgba(240, 228, 217, 0.3);
+}
+.search__input::placeholder {
+  color: var(--wine-burgundy-sub);
+}
+.search__input:focus-visible {
+  outline: 2px solid var(--wine-on-burgundy);
+  outline-offset: 4px;
 }
 .search select {
-  padding: 0.5rem 0.6rem;
-  font-size: 0.95rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: #fff;
-  color: var(--fg);
+  padding: 7px 14px;
+  font-size: 13px;
+  color: var(--wine-on-burgundy);
+  background: rgba(240, 228, 217, 0.08);
+  border: 1px solid rgba(240, 228, 217, 0.35);
+  border-radius: var(--radius-pill);
+}
+/* The native dropdown list renders on a light surface. */
+.search select option {
+  color: var(--wine-ink);
+  background: var(--wine-surface);
 }
 .search .clear {
-  padding: 0.5rem 0.8rem;
-  font-size: 0.95rem;
-  border: 1px solid var(--accent);
-  border-radius: var(--radius);
-  background: #fff;
-  color: var(--accent);
+  padding: 7px 16px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--wine-on-burgundy);
+  background: transparent;
+  border: 1px solid rgba(240, 228, 217, 0.5);
+  border-radius: var(--radius-pill);
   cursor: pointer;
 }
 .search__status {
   flex-basis: 100%;
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--muted);
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--wine-burgundy-sub);
 }
-.card__match {
+
+/* --- Empty catalogue + no-results states --- */
+.empty,
+.no-results {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--wine-text-2);
+}
+.no-results__icon {
   display: block;
-  margin-top: 0.4rem;
-  font-size: 0.72rem;
-  color: var(--accent);
+  font-size: 34px;
+  line-height: 1;
+  color: var(--wine-text-3);
+}
+.no-results__title {
+  font-family: var(--font-display);
+  font-size: 30px;
+  color: var(--wine-ink);
+  margin: 14px 0 10px;
+}
+.no-results__help {
+  max-width: 380px;
+  margin: 0 auto 18px;
+  font-size: 15px;
+  color: var(--wine-text-2);
+}
+.no-results__term {
+  color: var(--wine-burgundy);
+  font-weight: 600;
+}
+.no-results__clear {
+  padding: 2px 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--wine-burgundy);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--wine-burgundy);
+  cursor: pointer;
 }
 
+/* ===========================================================================
+   US2 — Detail page: burgundy top bar, two-column layout, data table, notes (T020)
+   =========================================================================== */
+.detail-topbar {
+  background: var(--wine-burgundy);
+  padding: 22px clamp(20px, 5vw, 40px);
+}
 .back {
-  display: inline-block;
-  margin-bottom: 1rem;
+  color: var(--wine-burgundy-sub);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-decoration: none;
 }
-
-.detail img {
-  max-width: 420px;
-  width: 100%;
-  height: auto;
-  border-radius: var(--radius);
-  border: 1px solid var(--line);
+.detail {
+  max-width: var(--container-detail);
 }
-
-.detail dl {
+.detail__grid {
   display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 0.35rem 1rem;
-  margin: 1.25rem 0;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 72px;
+  align-items: start;
 }
-
-.detail dt {
-  color: var(--muted);
+.detail__media {
+  position: sticky;
+  top: 32px;
+  display: flex;
+  justify-content: center;
+  background: linear-gradient(160deg, var(--wine-panel-a), var(--wine-panel-b));
+  border-radius: var(--radius-panel);
+  padding: 64px 40px 48px;
 }
-
-.detail dd {
+.detail__media img {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  filter: drop-shadow(0 22px 18px rgba(40, 35, 28, 0.24));
+}
+.detail__name {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(34px, 6vw, 52px);
+  line-height: 1.02;
+  color: var(--wine-ink);
+  margin: 16px 0 6px;
+}
+.detail__bodega {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 22px;
+  color: var(--wine-text-2);
+  margin: 0 0 26px;
+}
+.datatable {
+  margin: 0 0 36px;
+}
+.datatable__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--wine-hairline-2);
+}
+.datatable__row dt {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--wine-label);
+}
+.datatable__row dd {
   margin: 0;
+  font-size: 15px;
+  color: var(--wine-ink);
+  text-align: right;
+}
+.notas-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--wine-ink);
+  margin: 0 0 14px;
+}
+.notas {
+  max-width: 560px;
+}
+.notas :is(p, li) {
+  font-size: 16px;
+  line-height: 1.72;
+  color: var(--wine-ink-body);
+}
+
+@media (max-width: 760px) {
+  .detail__grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .detail__media {
+    position: static;
+    padding: 40px 28px 32px;
+  }
 }

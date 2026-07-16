@@ -11,6 +11,7 @@ const valid = {
   bodega: 'Vega Sicilia',
   denominacionOrigen: 'Ribera del Duero DO',
   anada: '2018',
+  tipo: 'tinto',
   fotoAlt: 'Botella de Vega Sicilia Único 2018',
   createdAt: '2026-07-15',
 };
@@ -29,5 +30,24 @@ describe('content frontmatter validation (FR-002 / FR-003)', () => {
   it('rejects an invalid vintage', () => {
     expect(frontmatter.safeParse({ ...valid, anada: '18' }).success).toBe(false);
     expect(frontmatter.safeParse({ ...valid, anada: 'twenty' }).success).toBe(false);
+  });
+});
+
+// FR-001 / FR-002 / FR-005 / FR-006: `tipo` is a required enum with no default.
+describe('tipo validation (FR-001 / FR-002 / FR-006)', () => {
+  it('accepts each of the six allowed types', () => {
+    for (const tipo of ['tinto', 'blanco', 'rosado', 'espumoso', 'dulce', 'generoso']) {
+      expect(frontmatter.safeParse({ ...valid, tipo }).success).toBe(true);
+    }
+  });
+
+  it('rejects a missing tipo (no silent default)', () => {
+    const { tipo, ...missing } = valid;
+    expect(frontmatter.safeParse(missing).success).toBe(false);
+  });
+
+  it('rejects a tipo outside the allowed set', () => {
+    expect(frontmatter.safeParse({ ...valid, tipo: 'naranja' }).success).toBe(false);
+    expect(frontmatter.safeParse({ ...valid, tipo: '' }).success).toBe(false);
   });
 });
