@@ -136,10 +136,16 @@ island hydrates and filters (no-results state). Skipped when `DEPLOY_URL` is uns
 ```bash
 npm run test            # Vitest: vintage, Zod schema, search/compose, schema-parity (Keystatic↔Zod)
 npm run test:island     # @testing-library/preact: CatalogueSearch island
-npm run test:e2e        # Playwright + axe: browse + search/filter + detail + empty (built site)
-npm run lint            # astro check + eslint + prettier
-npm run perf            # Lighthouse CI against a ~1,000-entry fixture build (budgets)
+npm run test:e2e        # Playwright + axe: browse, search/filter, detail, a11y, static-output (built site)
+npm run lint            # astro check + ESLint + Prettier (check)
+npm run format          # Prettier (write)
+npm run perf            # Lighthouse CI against the local build (budgets); scores 100/100/100/100
+npm run verify:static   # assert dist/ is pure static (no server / no /keystatic / no storage)
 ```
+
+> To stress-test performance at scale, `npm run gen:fixture` seeds a large
+> catalogue (~1,000 entries) before building; `perf` otherwise measures the
+> committed content.
 
 ## Project layout (high level)
 
@@ -149,7 +155,7 @@ src/
 ├── content/vinos/        # .mdoc entries (versioned in git; written by Keystatic)
 ├── assets/vinos/         # co-located images (versioned in git; optimised by astro:assets)
 ├── lib/                  # schema (Zod, single source), vintage, search (pure)
-├── components/           # WineCard/WineGrid (.astro), CatalogueSearch (Preact island), EmptyState, Placeholder
+├── components/           # WineCard/WineGrid (.astro), CatalogueSearch (Preact island), EmptyState
 ├── layouts/              # BaseLayout.astro (shell)
 ├── pages/                # index.astro, vinos/[slug].astro (getStaticPaths)
 └── styles/               # global.css — plain CSS design tokens (no Tailwind; discarded for v1)
