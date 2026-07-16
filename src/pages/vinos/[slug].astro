@@ -14,7 +14,10 @@ const { Content } = await render(wine);
 const base = import.meta.env.BASE_URL;
 ---
 
-<BaseLayout title={`${nombre} — ${bodega}`}>
+<BaseLayout
+  title={`${nombre} — ${bodega}`}
+  description={`${nombre} ${anada}, ${bodega} (${denominacionOrigen}).`}
+>
   <main class="wrap detail">
     <a class="back" href={base}>← Catálogo</a>
     <h1>{nombre}</h1>
