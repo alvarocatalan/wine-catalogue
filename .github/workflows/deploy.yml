@@ -1,3 +1,9 @@
+# ⚠️ ACTION VERSIONS ARE BEST-GUESS, NOT CONFIRMED. Web sources were contradictory
+# (e.g. actions/checkout shows as v4/v5/v7 across sources; withastro/action and
+# actions/deploy-pages could not be pinned with confidence). On the FIRST run, if a
+# step fails with "Unable to resolve action <action>@<tag>", read the tag from the
+# error, check that action's available release tags on GitHub, and pin a valid one.
+# See quickstart.md → Deploy → "First deploy (verify action versions)".
 name: Deploy to GitHub Pages
 
 on:
@@ -21,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7 # ⚠️ version unverified — adjust on first run if it fails to resolve
 
       # Constitution VI gate — fail fast (no deps needed) before the build.
       - name: Guard — no browser storage in source (Constitution VI)
@@ -32,7 +38,7 @@ jobs:
       # so the prebuild image gate (FR-014) runs in CI too; the build script sets
       # SKIP_KEYSTATIC=true → pure static output, no /keystatic route (FR-023).
       - name: Build static site
-        uses: withastro/action@v6
+        uses: withastro/action@v6 # ⚠️ version unverified — adjust on first run if it fails to resolve
         with:
           build-cmd: npm run build
         env:
@@ -47,4 +53,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@v5 # ⚠️ version unverified — adjust on first run if it fails to resolve

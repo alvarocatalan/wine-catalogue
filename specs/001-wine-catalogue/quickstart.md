@@ -102,9 +102,23 @@ GitHub Pages to publish from the Actions workflow. (T053)
 3. `actions/deploy-pages@v5` publishes to
    `https://alvarocatalan.github.io/wine-catalog/`.
 
-Action versions verified against Astro's docs (checkout@v7, withastro/action@v6,
-deploy-pages@v5). `base: '/wine-catalog/'` is set in `astro.config.mjs` for the
-production build.
+> ⚠️ **Action version tags are best-guess, NOT confirmed** (`checkout@v7`,
+> `withastro/action@v6`, `deploy-pages@v5`) — web sources were contradictory. Each
+> `uses:` in `deploy.yml` is annotated to verify/adjust on the first run.
+> `base: '/wine-catalog/'` is set in `astro.config.mjs`.
+
+### First deploy (verify action versions)
+
+Goal: cheap to fail, easy to diagnose. Do it **manually**, not via a push to `main`:
+
+1. **Enable Pages** — repo **Settings → Pages → Source: GitHub Actions** (the step above).
+2. **Trigger manually** — **Actions** tab → *Deploy to GitHub Pages* → **Run workflow**
+   (uses `workflow_dispatch`; no push to `main` required).
+3. **If a step fails** with `Unable to resolve action <action>@<tag>`: read the tag
+   from the error, open that action's repo on GitHub, check its available release
+   tags, pin a valid one in `deploy.yml`, and commit the fix.
+4. **Re-run** the workflow.
+5. **Only when the whole run is green**, run the published-site smoke (T054) below.
 
 **Post-deploy smoke (T054)** — verify the **published** site, not the local build:
 
