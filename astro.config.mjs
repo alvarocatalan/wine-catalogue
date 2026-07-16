@@ -22,13 +22,13 @@ if (!SKIP_KEYSTATIC) {
 }
 
 export default defineConfig({
-  // GitHub Pages project pages (repo: wine-catalog)
+  // GitHub Pages project pages (repo: wine-catalogue)
   site: 'https://alvarocatalan.github.io',
-  // The production static site is served from /wine-catalog/ (GitHub Pages project
+  // The production static site is served from /wine-catalogue/ (GitHub Pages project
   // page). Keystatic's admin UI + API do NOT work under a non-root `base`, so during
   // dev authoring (SKIP_KEYSTATIC unset) we serve from root. Same flag that toggles
   // the Keystatic integration above, so the two stay in sync.
-  base: SKIP_KEYSTATIC ? '/wine-catalog/' : '/',
+  base: SKIP_KEYSTATIC ? '/wine-catalogue/' : '/',
   integrations,
   ...(adapter ? { adapter } : {}),
 });

@@ -4,7 +4,7 @@ import { defineConfig } from '@playwright/test';
 // The post-deploy smoke (deploy-smoke.spec.ts) runs against the LIVE site when
 // DEPLOY_URL is set — in that case we do NOT start a local server.
 const DEPLOY_URL = process.env.DEPLOY_URL;
-const LOCAL_URL = 'http://127.0.0.1:4321/wine-catalog/';
+const LOCAL_URL = 'http://127.0.0.1:4321/wine-catalogue/';
 
 export default defineConfig({
   testDir: './tests/e2e',

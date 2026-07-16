@@ -100,12 +100,12 @@ GitHub Pages to publish from the Actions workflow. (T053)
    `npm run build` (image gate + `SKIP_KEYSTATIC=true` → pure static, no
    `/keystatic`) + uploads the Pages artifact.
 3. `actions/deploy-pages@v5` publishes to
-   `https://alvarocatalan.github.io/wine-catalog/`.
+   `https://alvarocatalan.github.io/wine-catalogue/`.
 
 > ⚠️ **Action version tags are best-guess, NOT confirmed** (`checkout@v7`,
 > `withastro/action@v6`, `deploy-pages@v5`) — web sources were contradictory. Each
 > `uses:` in `deploy.yml` is annotated to verify/adjust on the first run.
-> `base: '/wine-catalog/'` is set in `astro.config.mjs`.
+> `base: '/wine-catalogue/'` is set in `astro.config.mjs`.
 
 ### First deploy (verify action versions)
 
@@ -123,12 +123,12 @@ Goal: cheap to fail, easy to diagnose. Do it **manually**, not via a push to `ma
 **Post-deploy smoke (T054)** — verify the **published** site, not the local build:
 
 ```bash
-DEPLOY_URL=https://alvarocatalan.github.io/wine-catalog/ \
+DEPLOY_URL=https://alvarocatalan.github.io/wine-catalogue/ \
   npx playwright test tests/e2e/deploy-smoke.spec.ts
 ```
 
 It checks: the home page loads; a detail page (`/vinos/unico/`) loads with its
-optimised `.webp` image under the correct `/wine-catalog/` base; and the search
+optimised `.webp` image under the correct `/wine-catalogue/` base; and the search
 island hydrates and filters (no-results state). Skipped when `DEPLOY_URL` is unset.
 
 ## Tests

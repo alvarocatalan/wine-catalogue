@@ -16,5 +16,5 @@ test('grid renders a card per wine with its key fields', async ({ page }) => {
   await expect(card.locator('img')).toBeVisible();
 
   // card links to its detail page
-  await expect(card.locator('a')).toHaveAttribute('href', /\/wine-catalog\/vinos\/unico\/$/);
+  await expect(card.locator('a')).toHaveAttribute('href', /\/wine-catalogue\/vinos\/unico\/$/);
 });
