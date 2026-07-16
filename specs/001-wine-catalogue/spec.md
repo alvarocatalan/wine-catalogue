@@ -36,11 +36,12 @@
   after the wine's slug to avoid collisions.
 - Q: Numeric image-weight / LCP budget? → A: **Out of scope for v1** (a conscious
   decision): no numeric criterion; rely on Astro `<Image />` default optimisation.
-- Q: Upload validation/failure behaviour (CHK017)? → A: The Keystatic panel
-  surfaces a validation error and does not save the entry when a required field
-  is missing or the image violates the format/size limits, via Keystatic's
-  native validation (FR-024). No upload-progress, retry, or network-upload
-  feedback (that belongs to the discarded interactive model).
+- Q: Upload validation/failure behaviour (CHK017)? → A: Keystatic's native
+  validation surfaces an error and blocks the save only for missing required
+  fields and an `anada` value that fails the `NV`/`YYYY` pattern (FR-024). Image
+  format and size are NOT validated by Keystatic — they are enforced by the
+  build gate (FR-014). No upload-progress, retry, or network-upload feedback
+  (that belongs to the discarded interactive model).
 - Q: Image behaviour on edit (CHK014)? → A: Editing a wine retains its existing
   image unless the administrator explicitly replaces it (native Keystatic
   behaviour) — documented as FR-025.
