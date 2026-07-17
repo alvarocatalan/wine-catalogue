@@ -15,22 +15,25 @@ test('home renders the hero, section header count, and a redesigned card per win
   // Section header with the wine count.
   await expect(page.locator('#wine-count')).toContainText('1');
 
-  // Grid + one card (fixture: unico).
+  // Grid + one card (fixture: les-terrasses).
   const cards = page.locator('ul.grid > li.card');
   await expect(cards).toHaveCount(1);
 
   const card = cards.first();
-  await expect(card).toHaveAttribute('data-nombre', 'Único');
+  await expect(card).toHaveAttribute('data-nombre', 'Les Terrasses');
   await expect(card).toHaveAttribute('data-tipo', 'tinto');
-  await expect(card.locator('.card__name')).toHaveText('Único');
-  await expect(card.locator('.card__meta')).toContainText('Vega Sicilia');
-  await expect(card.locator('.card__meta')).toContainText('2018');
-  await expect(card.locator('.card__do')).toContainText('Ribera del Duero DO');
+  await expect(card.locator('.card__name')).toHaveText('Les Terrasses');
+  await expect(card.locator('.card__meta')).toContainText('Álvaro Palacios');
+  await expect(card.locator('.card__meta')).toContainText('2022');
+  await expect(card.locator('.card__do')).toContainText('Priorat');
   await expect(card.locator('img')).toBeVisible();
 
   // Colour-coded type label (text carries the meaning; colour reinforces it).
   await expect(card.locator('.type-label__text')).toHaveText(/tinto/i);
 
   // Whole card links to its detail page.
-  await expect(card.locator('a')).toHaveAttribute('href', /\/wine-catalogue\/vinos\/unico\/$/);
+  await expect(card.locator('a')).toHaveAttribute(
+    'href',
+    /\/wine-catalogue\/vinos\/les-terrasses\/$/,
+  );
 });

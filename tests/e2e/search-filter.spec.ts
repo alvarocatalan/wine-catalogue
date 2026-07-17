@@ -2,15 +2,15 @@ import { test, expect } from '@playwright/test';
 
 // US4 / FR-015, FR-017, FR-018: a single in-memory search field matches across all
 // fields (incl. type), over the built static site (single committed fixture:
-// unico = tinto, Ribera del Duero DO, Vega Sicilia, 2018). No facet dropdowns.
+// les-terrasses = tinto, Priorat, Álvaro Palacios, 2022). No facet dropdowns.
 test('the single field filters by text and drives the no-results state', async ({ page }) => {
   await page.goto('./');
-  const card = page.locator('.card[data-slug="unico"]');
+  const card = page.locator('.card[data-slug="les-terrasses"]');
   const search = page.locator('input[type="search"]');
 
   await expect(card).toBeVisible();
 
-  await search.fill('vega'); // matches bodega
+  await search.fill('palacios'); // matches bodega
   await expect(card).toBeVisible();
 
   await search.fill('zzzzzz'); // no match
@@ -28,10 +28,10 @@ test('the single field filters by text and drives the no-results state', async (
 
 test('the single field filters by type as free text (FR-015)', async ({ page }) => {
   await page.goto('./');
-  const card = page.locator('.card[data-slug="unico"]');
+  const card = page.locator('.card[data-slug="les-terrasses"]');
   const search = page.locator('input[type="search"]');
 
-  await search.fill('tinto'); // unico is tinto → matches on the type field
+  await search.fill('tinto'); // les-terrasses is tinto → matches on the type field
   await expect(card).toBeVisible();
   await expect(page.locator('#wine-count')).toContainText('1');
 
@@ -42,7 +42,7 @@ test('the single field filters by type as free text (FR-015)', async ({ page }) 
 
 test('the single field also matches the Denominación de Origen (FR-015)', async ({ page }) => {
   await page.goto('./');
-  const card = page.locator('.card[data-slug="unico"]');
-  await page.locator('input[type="search"]').fill('ribera');
+  const card = page.locator('.card[data-slug="les-terrasses"]');
+  await page.locator('input[type="search"]').fill('priorat');
   await expect(card).toBeVisible();
 });

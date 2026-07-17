@@ -16,7 +16,7 @@ test('home grid collapses to a single column on mobile', async ({ page }) => {
 });
 
 test('detail columns stack and the image is not sticky on mobile', async ({ page }) => {
-  await page.goto('./vinos/unico/');
+  await page.goto('./vinos/les-terrasses/');
 
   const cols = await page
     .locator('.detail__grid')

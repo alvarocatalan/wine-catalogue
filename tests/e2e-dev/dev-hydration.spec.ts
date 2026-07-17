@@ -15,7 +15,7 @@ test('the search island hydrates and filters in dev (React + Preact coexist)', a
 
   await page.goto('/', { waitUntil: 'networkidle' });
 
-  const card = page.locator('.card[data-slug="unico"]');
+  const card = page.locator('.card[data-slug="les-terrasses"]');
   const search = page.locator('input[type="search"]');
   await expect(card).toBeVisible();
 

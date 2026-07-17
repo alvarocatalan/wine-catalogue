@@ -11,7 +11,7 @@ test('catalogue grid has no WCAG 2.1 AA violations', async ({ page }) => {
 });
 
 test('wine detail page has no WCAG 2.1 AA violations', async ({ page }) => {
-  await page.goto('./vinos/unico/');
+  await page.goto('./vinos/les-terrasses/');
   const results = await new AxeBuilder({ page }).withTags(WCAG_AA).analyze();
   expect(results.violations).toEqual([]);
 });

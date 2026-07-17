@@ -13,11 +13,11 @@ test('published home loads', async ({ page }) => {
 });
 
 test('published detail loads with an optimised image under the correct base', async ({ page }) => {
-  await page.goto('./vinos/unico/');
-  await expect(page.locator('h1')).toHaveText('Único');
+  await page.goto('./vinos/les-terrasses/');
+  await expect(page.locator('h1')).toHaveText('Les Terrasses');
   await expect(page.locator('.detail img')).toHaveAttribute(
     'src',
-    /\/wine-catalogue\/_astro\/foto\..*\.webp/,
+    /\/wine-catalogue\/_astro\/les-terrasses\..*\.webp/,
   );
 });
 
